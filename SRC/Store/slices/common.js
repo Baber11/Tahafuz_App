@@ -14,7 +14,7 @@ const initialState = {
   sellerService: [],
   selectedRole: '',
   category: [],
-  location: '',
+  location: {},
   pickupLocatin: {},
   dropoffLocation: {},
 };
@@ -212,7 +212,7 @@ const CommonSlice = createSlice({
         item => item.serviceOwner.id != action.payload.serviceOwner.id,
       );
     },
-    setLoaction(state, action) {
+    setLocation(state, action) {
       state.location = action.payload;
       console.log('🚀 ~ setLoaction ~ ==============location:', action.payload);
     },
@@ -242,7 +242,7 @@ export const {
   deleteService,
   deleteProducts,
   Order,
-  setLoaction,
+  setLocation,
   setPickupLocation,
   setDropoffLocation,
 } = CommonSlice.actions;

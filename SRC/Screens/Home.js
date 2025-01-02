@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../Components/Header'
 import { moderateScale } from 'react-native-size-matters'
 import { windowHeight, windowWidth } from '../Utillity/utils'
@@ -7,10 +7,13 @@ import LinearGradient from 'react-native-linear-gradient'
 import CustomText from '../Components/CustomText'
 import CustomImage from '../Components/CustomImage'
 import CustomButton from '../Components/CustomButton'
-import { useDisclose } from 'native-base'
-import { useDispatch } from 'react-redux'
+import GetLocation from "react-native-get-location";
+import { useDispatch } from 'react-redux';
+import {setLocation} from "../Store/slices/common";
+
 
 const Home = () => {
+    const dispatch = useDispatch();
 
     const data = [
         {
@@ -34,6 +37,24 @@ const Home = () => {
           image: require('../Assets/Images/police.png'), // Replace with your actual path
         },
       ];
+      useEffect(() => {
+        console.log("Running....")
+        GetLocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 60000,
+        })
+        .then(location => {
+            dispatch(setLocation({
+                lat: location.latitude,
+                lng:location.longitude
+            }))
+            console.log(location);
+        })
+        .catch(error => {
+            const { code, message } = error;
+            console.warn(code, message);
+        })
+      }, [])
       
       
   return (

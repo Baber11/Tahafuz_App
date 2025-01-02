@@ -1,45 +1,100 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import Header from '../Components/Header'
 import LinearGradient from 'react-native-linear-gradient'
 import { moderateScale } from 'react-native-size-matters'
-import { windowHeight, windowWidth } from '../Utillity/utils';
+import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Octicons from "react-native-vector-icons/Octicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Icon } from 'native-base'
+import { Avatar, Icon } from 'native-base'
 import CustomText from '../Components/CustomText'
-import Color from '../Assets/Utilities/Color'
+import Color from '../Assets/Utilities/Color';
+import Contacts from 'react-native-contacts';
+import { useIsFocused } from '@react-navigation/native'
+import ContactsModal from '../Components/ContactsModal'
 
-const Contacts = () => {
+
+const ContactsScreen = () => {
+  const isFocused = useIsFocused();
+
+  const [contacts, setContacts] = useState([
+    {
+      id:1,
+      name:"Mir MUhammad",
+      number:"0325-2968018",
+    },
+      {
+      id:2,
+      name:"Muhammad Umair",
+      number:"0325-2968018",
+    },
+      {
+      id:3,
+      name:"Umees Ur Rehman",
+      number:"0325-2968018",
+  
+    },
+      {
+      id:4,
+      name:"Muhammad Huzaifa",
+      number:"0325-2968018",
+    },
+      {
+      id:5,
+      name:"Muhammad Sumama",
+      number:"0325-2968018",
+    }
+  ]);
+  console.log("🚀 ~ ContactsScreen ~ contacts:", JSON.stringify(contacts,null,2))
+  const [fetchedContacts , setFetchedContacts] = useState([]);
+  const [modalIsVisible, setModalIsVisible] = useState(false)
+
+  useEffect(()=>{
+    const checkpermissions = async ()=>{
+    const granted=  await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)
+    if(granted == false){
+      requestContactsPermission()
+    }
+      console.log("====> Permissions ==> ", granted)
+    }
+    checkpermissions()
+  },[isFocused])
+useEffect(()=>{
+  const getContacts = async () =>{
+    const contatcsData= await Contacts.getAll();
+    setFetchedContacts(contatcsData?.map(item => ({
+      id: item.recordID, 
+      name: item.displayName,
+      number: item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : '', 
+      photo: item.thumbnailPath ? item.thumbnailPath : null,
+    })))
+    console.log(JSON.stringify(fetchedContacts,null,2));
+  }
+  getContacts()
+},[isFocused])
   const settingsArray =[
       {
       id:1,
       name:"Mir MUhammad",
       phone:"0325-2968018",
-      // iconName:"lock-outline",
-      // iconType: MaterialIcons,
-
+    
       onPress: () =>{}
     },
       {
       id:2,
       name:"Muhammad Umair",
       phone:"0325-2968018",
-      // iconName:"shield-check",
-      // iconType: Octicons,
       onPress: () =>{
-        // navigation.navigate("SafetyAtWork")
       }
     },
       {
       id:3,
       name:"Umees Ur Rehman",
-      // phone:"0325-2968018",
-      // iconName:"account-box-outline",
+      phone:"0325-2968018",
       iconType: MaterialCommunityIcons,
       onPress: () =>{}
     },
@@ -78,19 +133,28 @@ const Contacts = () => {
     >
         <View style={styles.mainSettings}>
 
-         {settingsArray.map((item,index) =>{
+         {contacts.map((item,index) =>{
             return(
                 <TouchableOpacity
                 onPress={item?.onPress}
                 style={styles.ListTile}>
-                    <View style={styles.leading}>
+                    {/* <View style={styles.leading}>
                      <Icon as={FontAwesome6} name={"user"} 
                      color={Color.white}
                      size={moderateScale(24,0.3)}/> 
-                    </View>
+                    </View> */}
+                    <Avatar 
+
+                    source={{uri: item?.photo }}
+                    backgroundColor={"#8f97a6"}
+                    >
+                                          <Icon as={FontAwesome6} name={"user"} 
+                     color={Color.white}
+                     size={moderateScale(24,0.3)}/> 
+                    </Avatar>
                     <View style={styles.infoText}>
                     <CustomText style={styles.title} isBold>{item.name}</CustomText>
-                    <CustomText style={styles.phoneNum} isBold>{item.phone}</CustomText>
+                    <CustomText style={styles.phoneNum} isBold>{item.number}</CustomText>
                 </View>
             <Icon as={FontAwesome6} name={"phone"} 
                      color={Color.lightGreen}
@@ -100,7 +164,9 @@ const Contacts = () => {
             )
          })}
 
-         <TouchableOpacity style={styles.FAB}>
+         <TouchableOpacity style={styles.FAB} onPress={()=>{
+          setModalIsVisible(true);
+         }}>
           <Icon 
           name={"plus"}
           as={AntDesign}
@@ -110,11 +176,18 @@ const Contacts = () => {
          </TouchableOpacity>
         </View>
     </LinearGradient>
+    <ContactsModal
+    modalIsVisible={modalIsVisible}
+    setModalIsVisible={setModalIsVisible}
+    data={fetchedContacts?.filter(item => !contacts.some( c => c.id === item?.id))}
+    // contacts={contacts}
+    setContacts={setContacts}
+    />
     </>
   )
 }
 
-export default Contacts
+export default ContactsScreen;
 
 const styles = StyleSheet.create({
 

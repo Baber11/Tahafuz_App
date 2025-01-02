@@ -12,6 +12,7 @@ import Contacts from './SRC/Screens/Contacts';
 import Profile from './SRC/Screens/Profile';
 import Home from './SRC/Screens/Home';
 import VoiceRecordings from './SRC/Screens/VoiceRecordings';
+import { requestCameraPermission, requestContactsPermission, requestLocationPermission, requestWritePermission } from './SRC/Utillity/utils';
 
 const App = () =>{
     return (
@@ -28,6 +29,16 @@ const App = () =>{
 
 
 const MainContainer = () => {
+  useEffect(() => {
+    async function GetPermission() {
+      
+      await requestCameraPermission();
+      await requestWritePermission();
+     await requestContactsPermission();
+      await requestLocationPermission();
+    }
+    GetPermission();
+  }, []);
     const [isloading] = useloader(true);
     if (isloading == true) {
       return <SplashScreen />

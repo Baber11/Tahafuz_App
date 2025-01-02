@@ -23,6 +23,7 @@ import { moderateScale } from 'react-native-size-matters';
 import { windowHeight, windowWidth } from './Utillity/utils';
 import Color from './Assets/Utilities/Color';
 import CustomImage from './Components/CustomImage';
+import ContactsScreen from './Screens/Contacts';
 // import {createDrawerNavigator} from '@react-navigation/drawer';
 
 // enableScreens();
@@ -168,7 +169,7 @@ export const TabNavigation = () => {
         tabBarShowLabel: false,
       })}>
 
-      <Tabs.Screen name={'Contacts'} component={Contacts} />
+      <Tabs.Screen name={'Contacts'} component={ContactsScreen} />
       <Tabs.Screen name={'VoiceRecordings'} component={VoiceRecordings} />
       <Tabs.Screen name="SafetyAtWork" component={SafetyAtWork}/>
       <Tabs.Screen name={'Profile'} component={Profile} />

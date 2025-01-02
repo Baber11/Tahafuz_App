@@ -27,8 +27,29 @@ const requestLocationPermission = async () => {
     console.warn(err);
   }
 };
+const requestContactsPermission = async () =>{
+  console.log("running contacts Permission")
+    try {
+    const granted = await  PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
+        title: 'Contacts',
+        message: 'This app would like to view your contacts.',
+        buttonPositive: 'Please accept bare mortal',
+    })
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You have access of contacts');
+    } else {
+      console.log('Contacts permission denied');
+    }
 
+    } catch (error) {
+    console.warn(err);
+      
+    }
+}
 const requestCameraPermission = async () => {
+  console.log("running camera Permission")
+
   try {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.CAMERA,
@@ -119,6 +140,7 @@ export {
   requestLocationPermission,
   requestCameraPermission,
   requestWritePermission,
+  requestContactsPermission,
   apiHeader,
   sleep,
   wait,
