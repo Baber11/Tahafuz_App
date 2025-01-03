@@ -1,4 +1,4 @@
-import { PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { FlatList, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Header from '../Components/Header'
 import LinearGradient from 'react-native-linear-gradient'
@@ -132,17 +132,20 @@ useEffect(()=>{
     style={styles.main}
     >
         <View style={styles.mainSettings}>
-
-         {contacts.map((item,index) =>{
+          <FlatList 
+           keyExtractor={item => item.id}
+           data={contacts}
+          //  style={{width: windowWidth * 0.85}}
+          //  contentContainerStyle={{
+          //   alignItems:"center",
+          //   justifyContent:'center'
+          //  }}
+           renderItem={({item,index}) =>{
             return(
                 <TouchableOpacity
                 onPress={item?.onPress}
                 style={styles.ListTile}>
-                    {/* <View style={styles.leading}>
-                     <Icon as={FontAwesome6} name={"user"} 
-                     color={Color.white}
-                     size={moderateScale(24,0.3)}/> 
-                    </View> */}
+               
                     <Avatar 
 
                     source={{uri: item?.photo }}
@@ -156,13 +159,20 @@ useEffect(()=>{
                     <CustomText style={styles.title} isBold>{item.name}</CustomText>
                     <CustomText style={styles.phoneNum} isBold>{item.number}</CustomText>
                 </View>
+                {/* <View style={{width: windowWidth * 0.12}}> */}
+
             <Icon as={FontAwesome6} name={"phone"} 
                      color={Color.lightGreen}
                      size={moderateScale(24,0.3)}/> 
+                   
                     
                 </TouchableOpacity>       
             )
-         })}
+         }}
+
+          />
+
+         {/* {contacts.map()} */}
 
          <TouchableOpacity style={styles.FAB} onPress={()=>{
           setModalIsVisible(true);
@@ -206,7 +216,7 @@ mainSettings:{
     paddingTop:moderateScale(12,0.2),
     backgroundColor:"rgba(255,255,255,0.35)",      
     gap:moderateScale(20,0.2),
-    paddingHorizontal:moderateScale(20,0.2),
+    paddingHorizontal:moderateScale(10,0.2),
 borderRadius:moderateScale(10,0.2),
 borderWidth:1,
 borderColor:"rgba(255, 255, 255, 0.19)"
@@ -214,8 +224,12 @@ borderColor:"rgba(255, 255, 255, 0.19)"
 },
 ListTile:{
     flexDirection:"row",
-    gap:moderateScale(22,0.2),
+    paddingHorizontal:moderateScale(5,0.3),
+    // width: windowWidth * 0.9,
+    // backgroundColor:"red",
+    gap:moderateScale(18,0.2),
     alignItems:"center",
+    marginTop:moderateScale(10,0.2)
 
 
 },
@@ -230,7 +244,8 @@ leading:{
 }, 
 title:{
     fontSize:moderateScale(21,0.2),
-    lineHeight:moderateScale(26,0.5)
+    lineHeight:moderateScale(26,0.5),
+    
 },
 phoneNum:{
   color:"#8B8B8B",

@@ -99,7 +99,7 @@ export const TabNavigation = () => {
             color = focused ? Color.black : Color.black;
             size = focused ? moderateScale(30, 0.3) : moderateScale(25, 0.3);
           } else if (route.name === 'Home') {
-            iconName = focused ? 'home-outline' : 'home';
+            iconName = focused ? 'home-outline' : 'home-outline';
             type = Ionicons;
             color = focused ? Color.black : Color.black;
             size = focused ? moderateScale(30, 0.3) : moderateScale(25, 0.3);
