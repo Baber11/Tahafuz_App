@@ -12,38 +12,14 @@ import ContactsModal from '../Components/ContactsModal'
 import CustomText from '../Components/CustomText'
 import Header from '../Components/Header'
 import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils'
+import CustomImage from '../Components/CustomImage'
 
 
 const ContactsScreen = () => {
   const isFocused = useIsFocused();
 
   const [contacts, setContacts] = useState([
-    {
-      id:1,
-      name:"Mir MUhammad",
-      number:"0325-2968018",
-    },
-      {
-      id:2,
-      name:"Muhammad Umair",
-      number:"0325-2968018",
-    },
-      {
-      id:3,
-      name:"Umees Ur Rehman",
-      number:"0325-2968018",
-  
-    },
-      {
-      id:4,
-      name:"Muhammad Huzaifa",
-      number:"0325-2968018",
-    },
-      {
-      id:5,
-      name:"Muhammad Sumama",
-      number:"0325-2968018",
-    }
+   
   ]);
   console.log("🚀 ~ ContactsScreen ~ contacts:", JSON.stringify(contacts,null,2))
   const [fetchedContacts , setFetchedContacts] = useState([]);
@@ -80,7 +56,7 @@ useEffect(()=>{
         title={"Contacts"}
     titleImage={require("../Assets/Images/Personalcard.png")}
         textstyle={{fontWeight: "bold"}}
-        showBack headerColor={"#FFECD0"}
+        showBack={false} headerColor={"#FFECD0"}
         search
         headerRight={true}
         />
@@ -90,10 +66,30 @@ useEffect(()=>{
     end={{x: 0.9, y:0.8 }}
     style={styles.main}
     >
-        <View style={styles.mainSettings}>
+        <View style={[styles.mainSettings, contacts?.length == 0  && {
+          justifyContent:"center",
+          alignItems:"center"
+        }]}>
           <FlatList 
            keyExtractor={item => item.id}
            data={contacts}
+           ListEmptyComponent={()=>{
+            return (
+              <View style={{width: "100%", 
+              paddingHorizontal:moderateScale(20,0.2),
+              height: windowHeight * 0.67, 
+              // backgroundColor:"red",
+              alignItems:"center", justifyContent:"center"}}>
+                <View style={{width: windowWidth * 0.25, height: windowWidth * 0.25, overflow:"hidden"}}>
+                <CustomImage 
+                style={{width:"100%", height:"100%"}}
+                // resizeMode={"contain"}
+                source={require("../Assets/Images/contacts.png")}/>
+                </View>  
+                <CustomText isBold>No Contacts Added yet.</CustomText>
+              </View>
+            )
+           }}
            renderItem={({item,index}) =>{
             return(
                 <TouchableOpacity
@@ -110,7 +106,7 @@ useEffect(()=>{
                      size={moderateScale(24,0.3)}/> 
                     </Avatar>
                     <View style={styles.infoText}>
-                    <CustomText style={styles.title} isBold>{item.name}</CustomText>
+                    <CustomText style={styles.title} isBold numberOfLines={1}>{item.name}</CustomText>
                     <CustomText style={styles.phoneNum} isBold>{item.number}</CustomText>
                 </View>
                 {/* <View style={{width: windowWidth * 0.12}}> */}
@@ -144,7 +140,7 @@ useEffect(()=>{
     modalIsVisible={modalIsVisible}
     setModalIsVisible={setModalIsVisible}
     data={fetchedContacts?.filter(item => !contacts.some( c => c.id === item?.id))}
-    // contacts={contacts}
+    contacts={contacts}
     setContacts={setContacts}
     />
     </>

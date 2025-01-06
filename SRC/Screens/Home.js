@@ -3,16 +3,23 @@ import { FlatList, Linking, StyleSheet, View } from 'react-native';
 import GetLocation from 'react-native-get-location';
 import LinearGradient from 'react-native-linear-gradient';
 import { moderateScale } from 'react-native-size-matters';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Feather from "react-native-vector-icons/Feather";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
+// import Feather from "react-native-vector-icons/Feather";
 import CustomButton from '../Components/CustomButton';
 import CustomImage from '../Components/CustomImage';
 import CustomText from '../Components/CustomText';
 import Header from '../Components/Header';
 import { setLocation } from '../Store/slices/common';
 import { windowHeight, windowWidth } from '../Utillity/utils';
+import { Icon } from 'native-base';
 
 
 const Home = () => {
+  const location = useSelector(state => state.commonReducer.location)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -36,6 +43,58 @@ const Home = () => {
     });
   }, []);
   
+  const emergencyCardData=[
+    { 
+      id: 1, 
+      title: "Active Emergency", 
+      colors: ['#FC4A1ACC', '#F7B733CC'], 
+      contact: "15", 
+      iconName: "alert-triangle", 
+      iconType: Feather 
+    },
+    { 
+      id: 2, 
+      title: "Police", 
+      colors: ["#ff6969", "#ffb0b0"], 
+      contact: "115", 
+      iconName: "police-badge", 
+      iconType: MaterialCommunityIcons 
+    },
+    { 
+      id: 3, 
+      title: "Ambulance", 
+      colors: ["#48bfe3", "#64b5f6"], 
+      contact: "1020", 
+      iconName: "ambulance", 
+      iconType: FontAwesome5 
+    },
+    { 
+      id: 4, 
+      title: "Fire Brigade", 
+      colors: ["#ef9cda", "#fc6dab"], 
+      contact: "16", 
+      iconName: "fire", 
+      iconType: FontAwesome5 
+    },
+    { 
+      id: 5, 
+      title: "Ambulance", 
+      colors: ["#fc6dab", "#e0aaff"], 
+      contact: "1101", 
+      iconName: "ambulance", 
+      iconType: FontAwesome5
+    },
+    { 
+      id: 6, 
+      title: "PCSW", 
+      colors: ["#F7B733CC","#FF3974CC"], 
+      contact: "1043", 
+      iconName: "shield", 
+      iconType: FontAwesome6 
+    }
+  ];
+  
+
   const data = [
     {
       id: 1,
@@ -113,29 +172,28 @@ const Home = () => {
                 gap:moderateScale(20,0.2),
                 }}  
               horizontal
-                data={[15, 115, 1020, 16, 1101, 915]}
+                data={emergencyCardData}
               renderItem={({item, index})=>{
                 return(
                   <LinearGradient
-                  colors={['#FC4A1ACC', '#F7B733CC']}
+                  colors={item.colors}
                   start={{x: 0.5, y: 0.1}}
                   end={{x: 0.6, y: 0.5}}
                   
                   style={styles.emergencyCard}>
-                  <CustomImage
-                    source={require('../Assets/Images/Alert.png')}
-                    // style={{width: mod}}
-                  />
+                  <Icon as={item.iconType}
+                  style={{width: moderateScale(100,0.2)}}
+                  name={item.iconName} color={Color.black} size={moderateScale(30,0.3)}/>
                   <CustomText style={{color: Color.white}} isBold>
-                    Active Emergency
+                    {item.title}
                   </CustomText>
                   <CustomText style={{color: Color.white}} isBold>
-                    Call 1-5 for Emergency
+                    {`Call ${item.contact} for ${item.title}`}
                   </CustomText>
                   <View style={styles.emergencyNumbContainer}>
                     
                       <CustomButton
-                        text={item}
+                        text={item.contact}
                         alignSelf="flex-start"
                         bgColor={Color.white}
                         borderColor={'white'}
@@ -143,7 +201,7 @@ const Home = () => {
                         borderWidth={1}
                         textColor={'#FC4A1ACC'}
                         onPress={() => {
-                          const url = `tel:${item}`;
+                          const url = `tel:${item.contact}`;
                           Linking.openURL(url).catch(err =>
                             console.error('Failed to open dial pad:', err),
                           );
@@ -174,7 +232,9 @@ const Home = () => {
             return (
               <View key={index} style={styles.exploreItem}>
                 <View style={styles.exploreCard}>
-                  <CustomImage source={item.image} />
+                  <CustomImage source={item.image} onPress={()=>{
+                    Linking.openURL(`geo:${location.latitude},${location.longitude}?q=${encodeURIComponent(item.title)}`)
+                  }}/>
                 </View>
                 <CustomText>{item.title}</CustomText>
               </View>

@@ -144,6 +144,9 @@ const ContactsModal = ({
             borderWidth={1}
             textColor={Color.black}
             onPress={() => {
+             if(contacts?.length >=5){
+                return ToastAndroid.show("You have already five contacts in your list.", ToastAndroid.SHORT);
+             }
               // navigation.navigate("Settings")
               setContacts(prevContacts => [
                 ...prevContacts,

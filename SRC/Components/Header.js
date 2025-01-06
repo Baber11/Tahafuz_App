@@ -105,7 +105,7 @@ const Header = props => {
             size={moderateScale(25, 0.3)}
             color={Color.black}
             onPress={() => {
-              navigationN.goBack();
+              navigation.goBack();
             }}
           />   
         ) : null}

@@ -1,5 +1,5 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import React, { useState } from 'react'
 import Header from '../Components/Header'
 import LinearGradient from 'react-native-linear-gradient'
 import { moderateScale } from 'react-native-size-matters'
@@ -9,57 +9,21 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import Octicons from "react-native-vector-icons/Octicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Icon } from 'native-base'
+import { Avatar, Icon, } from 'native-base'
 import CustomText from '../Components/CustomText'
 import Color from '../Assets/Utilities/Color'
+import CustomImage from '../Components/CustomImage'
+import TextInputWithTitle from '../Components/TextInputWithTitle'
+import CustomButton from '../Components/CustomButton'
 
 const Profile = () => {
-  const settingsArray =[
-      {
-      id:1,
-      name:"Mir MUhammad",
-      phone:"0325-2968018",
-      // iconName:"lock-outline",
-      // iconType: MaterialIcons,
-
-      onPress: () =>{}
-    },
-      {
-      id:2,
-      name:"Muhammad Umair",
-      phone:"0325-2968018",
-      // iconName:"shield-check",
-      // iconType: Octicons,
-      onPress: () =>{
-        // navigation.navigate("SafetyAtWork")
-      }
-    },
-      {
-      id:3,
-      name:"Umees Ur Rehman",
-      // phone:"0325-2968018",
-      // iconName:"account-box-outline",
-      iconType: MaterialCommunityIcons,
-      onPress: () =>{}
-    },
-      {
-      id:4,
-      name:"Muhammad Huzaifa",
-      phone:"0325-2968018",
-      // iconName:"exclamationcircleo",
-      // iconType: AntDesign,
-      onPress: () =>{}
-    },
-      {
-      id:5,
-      name:"Muhammad Sumama",
-      phone:"0325-2968018",
-      // iconName:"logout",
-      // iconType: MaterialCommunityIcons,
-      onPress: () =>{}
-    }
-  ]
+  const [name, setName] = useState('Emily Devis');
+  // const [lastName,setLastName] = useState("")
+  const [email, setEmail] = useState('abc@gmail.com');
+  const [phoneNum, setPhoneNum] = useState('090078601');
+  
   return (
     <>
         <Header 
@@ -72,6 +36,7 @@ const Profile = () => {
     titleIconType={FontAwesome6}
         headerRight={true}
         />
+        {/* <ScrollView> */}
         <LinearGradient 
     colors={["#FFECD0","#FF3974CC"]}
     start={{x: 0.7, y:0.7 }}
@@ -79,31 +44,111 @@ const Profile = () => {
     style={styles.main}
     >
         <View style={styles.mainSettings}>
+          <>
+        <View style={styles.profileImage}>
+          <CustomImage 
+          style={styles.image}
+          source={{uri:"https://randomuser.me/api/portraits/women/4.jpg"}}
+          />
+        </View>
+           <TouchableOpacity
+              onPress={() => {
+                // setShowModal(true);
+              }}
+              style={styles.edit}>
+              <Icon
+                name="pencil"
+                as={FontAwesome}
+                style={styles.icon2}
+                color={Color.white}
+                size={moderateScale(16, 0.3)}
+              />
+            </TouchableOpacity>
+            </>
 
-         {/* {settingsArray.map((item,index) =>{
-            return(
-                <TouchableOpacity
-                onPress={item?.onPress}
-                style={styles.ListTile}>
-                    <View style={styles.leading}>
-                     <Icon as={FontAwesome6} name={"user"} 
-                     color={Color.white}
-                     size={moderateScale(24,0.3)}/> 
-                    </View>
-                    <View style={styles.infoText}>
-                    <CustomText style={styles.title} isBold>{item.name}</CustomText>
-                    <CustomText style={styles.phoneNum} isBold>{item.phone}</CustomText>
-                </View>
-            <Icon as={FontAwesome6} name={"phone"} 
-                     color={Color.lightGreen}
-                     size={moderateScale(24,0.3)}/> 
-                    
-                </TouchableOpacity>       
-            )
-         })} */}
+       <CustomText style={{fontSize:moderateScale(24,0.3)}} isBold>{name}</CustomText>
+        <View style={styles.form}>
+      
+        <TextInputWithTitle
+          title={'Full Name'}
+          titleStlye={{fontSize: moderateScale(12, 0.2), paddingHorizontal: 0}}
+          secureText={false}
+          placeholder={''}
+          setText={setName}
+          value={name}
+          viewHeight={0.06}
+          viewWidth={0.75}
+          inputWidth={0.6}
+          border={1}
+          backgroundColor={"#f7d29c"}
+          borderColor={"#bd8024"}
+          marginTop={moderateScale(12, 0.3)}
+          color={"#d4850e"}
+          placeholderColor={Color.white}
+          borderRadius={moderateScale(10, 0.4)}
+          disable
+        />
+        <TextInputWithTitle
+          title={'Email'}
+          titleStlye={{fontSize: moderateScale(12, 0.2), paddingHorizontal: 0}}
+          secureText={false}
+          placeholder={''}
+          setText={setEmail}
+          value={email}
+          viewHeight={0.06}
+          viewWidth={0.75}
+          inputWidth={0.6}
+          border={1}
+          backgroundColor={"#f7d29c"}
+          marginTop={moderateScale(12, 0.3)}
+          color={"#d4850e"}
+          borderColor={"#bd8024"}
+          placeholderColor={Color.white}
+          borderRadius={moderateScale(10, 0.4)}
+          // disable
+        />
+         <TextInputWithTitle
+          title={'Phone'}
+          titleStlye={{fontSize: moderateScale(12, 0.2), paddingHorizontal: 0}}
+          secureText={false}
+          placeholder={''}
+          setText={setPhoneNum}
+          value={phoneNum}
+          viewHeight={0.06}
+          viewWidth={0.75}
+          inputWidth={0.6}
+          border={1}
+          borderColor={"#bd8024"}
+          backgroundColor={"#f7d29c"}
 
+          marginTop={moderateScale(12, 0.3)}
+          color={"#925f13"}
+          placeholderColor={"#d4850e"}
+          borderRadius={moderateScale(10, 0.4)}
+          // disable
+        />
+           <CustomButton
+        text={"Edit"}
+        bgColor={"#FF3974CC"}
+            borderColor={'white'}
+            borderRadius={moderateScale(10, 0.4)}
+            borderWidth={1}
+            textColor={Color.white}
+            onPress={() => {
+
+            }}
+            width={windowWidth * 0.35}
+            height={windowHeight * 0.06}
+            fontSize={moderateScale(24, 0.3)}
+            textTransform={'none'}
+            isGradient={false}
+            isBold
+            marginTop={moderateScale(30, 0.3)}
+        />
+        </View>
         </View>
     </LinearGradient>
+    {/* </ScrollView> */}
     </>
   )
 }
@@ -124,6 +169,8 @@ const styles = StyleSheet.create({
 mainSettings:{
     width: windowWidth * 0.9,
     height: windowHeight * 0.8,
+    justifyContent:"center",
+    alignItems:"center",
     paddingTop:moderateScale(12,0.2),
     backgroundColor:"rgba(255,255,255,0.35)",      
     gap:moderateScale(20,0.2),
@@ -133,45 +180,28 @@ borderWidth:1,
 borderColor:"rgba(255, 255, 255, 0.19)"
 
 },
-ListTile:{
-    flexDirection:"row",
-    gap:moderateScale(22,0.2),
-    alignItems:"center",
-
-
+profileImage:{
+  width: windowWidth * 0.35,
+  height: windowWidth * 0.35,
+  overflow: "hidden",
+  borderRadius: (windowWidth * 0.35) / 2
 },
-leading:{
-    width: windowWidth * 0.12,
-    height: windowWidth * 0.12,
-    borderRadius: (windowWidth * 0.12) * 2,
-    overflow:"hidden",
-    backgroundColor: "#8f97a6",
-    justifyContent:"center",
-    alignItems:"center"
-}, 
-title:{
-    fontSize:moderateScale(21,0.2),
-    lineHeight:moderateScale(26,0.5)
+image:{
+  width:"100%",
+  height:"100%"
 },
-phoneNum:{
-  color:"#8B8B8B",
-  fontSize:moderateScale(18,0.2)
+edit: {
+  backgroundColor: "#FF3974CC",
+  width: moderateScale(25, 0.3),
+  height: moderateScale(25, 0.3),
+  position: 'absolute',
+  top:moderateScale(175,0.2),
+  // bottom: moderateScale(5, 0.3),
+  right: moderateScale(120, 0.3),
+  borderRadius: moderateScale(12.5, 0.3),
+  elevation: 8,
+  zIndex:1,
+  justifyContent: 'center',
+  alignItems: 'center',
 },
-infoText:{
-  width:"65%"
-},
-FAB:{
-  width: windowWidth * 0.12,
-  height: windowWidth * 0.12,
-  borderRadius:(windowWidth * 0.12) /2,
-  backgroundColor:"#FF3974",
-  justifyContent:"center",
-  alignItems:"center",
-  elevatio:10,
-  position:"absolute",
-  right:moderateScale(12,0.2),
-  bottom:moderateScale(34,0.2)
-
-
-}
 })

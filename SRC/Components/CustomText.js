@@ -7,6 +7,7 @@ const CustomText = props => {
   return (
     <Text
       onPress={onPress}
+      // ellipsizeMode='tail'
       style={[
         {
           textTransform: 'capitalize',

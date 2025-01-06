@@ -15,6 +15,7 @@ import Header from '../Components/Header'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch } from 'react-redux'
 import { setUserToken } from '../Store/slices/auth'
+import CustomImage from '../Components/CustomImage'
 
 const Settings = () => {
 
@@ -39,10 +40,12 @@ const Settings = () => {
   },
     {
     id:3,
-    name:"Account",
+    name:"My Profile",
     iconName:"account-box-outline",
     iconType: MaterialCommunityIcons,
-    onPress: () =>{}
+    onPress: () =>{
+      navigation.navigate("Profile")
+    }
   },
     {
     id:4,
@@ -68,7 +71,7 @@ const Settings = () => {
         titleIcon={"settings-outline"}
         titleIconType={Ionicons}
         textstyle={{fontWeight: "bold"}}
-        showBack headerColor={"#FFECD0"}
+        showBack={false} headerColor={"#FFECD0"}
         headerRight
         />
     <LinearGradient 
@@ -78,6 +81,12 @@ const Settings = () => {
     style={styles.main}
     >
         <View style={styles.mainSettings}>
+        <View style={styles.profileImage}>
+          <CustomImage 
+          style={styles.image}
+          source={{uri:"https://randomuser.me/api/portraits/women/4.jpg"}}
+          />
+        </View>
          {settingsArray.map((item,index) =>{
             return(
                 <TouchableOpacity
@@ -141,5 +150,16 @@ const styles = StyleSheet.create({
     title:{
         fontSize:moderateScale(22,0.2),
         lineHeight:moderateScale(26,0.5)
-    }
+    },
+    profileImage:{
+      width: windowWidth * 0.35,
+      height: windowWidth * 0.35,
+      alignSelf:"center",
+      overflow: "hidden",
+      borderRadius: (windowWidth * 0.35) / 2
+    },
+    image:{
+      width:"100%",
+      height:"100%"
+    },
 })

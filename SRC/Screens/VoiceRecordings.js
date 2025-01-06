@@ -14,20 +14,15 @@ import { addTracks, setupPlayer } from '../Utillity/trackPlayerServices';
 import { windowHeight, windowWidth } from '../Utillity/utils';
 
 const VoiceRecordings = () => {
-    const [isPlaying, setIsPlaying] = useState(false);
+    // const [isPlaying, setIsPlaying] = useState(false);
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [currentTrack, setCurrentTrack] = useState(null); // Track currently playing
-    // console.log("🚀 ~ VoiceRecordings ~ currentTrack:", currentTrack)
-    // const [trackProgresses, setTrackProgresses] = useState({});
     const progress = useProgress(1000); // Update every 1 second
-    
-    const {position, duration} = useProgress(1000);
-    // console.log("🚀 ~ VoiceRecordings ~ position:", position)
+  
+  const {position, duration} = useProgress(1000);
   const playing=  usePlaybackState();
-  // console.log("🚀 ~ VoiceRecordings ~ playing:", playing.state == State.Playing)
   async function handlePlayPress() {
    const {state} = await TrackPlayer.getPlaybackState()
-    // console.log("🚀 ~ handlePlayPress ~ TrackPlayer.getPlaybackState(): ",state)
     if(state == State.Playing) {
       TrackPlayer.pause();
     }
@@ -142,10 +137,8 @@ const VoiceRecordings = () => {
         title={'Voice Recordings'}
         titleImage={require('../Assets/Images/Waveform.png')}
         textstyle={{fontWeight: 'bold'}}
-        showBack
+        showBack={false}
         headerColor={'#FFECD0'}
-
-        // headerRight
       />
       <LinearGradient
         colors={['#FFECD0', '#FF3974CC']}

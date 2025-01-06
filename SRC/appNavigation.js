@@ -53,7 +53,7 @@ const AppNavigator = () => {
           /> */}
           <RootNav.Screen name="LoginScreen" component={LoginScreen} />
           <RootNav.Screen name="TabNavigation" component={TabNavigation} />
-          <RootNav.Screen name="Settings" component={Settings} />
+          <RootNav.Screen name={'Profile'} component={Profile} />
           {/* <RootNav.Screen name="Home" component={Home} />
           <RootNav.Screen name="SafetyAtWork" component={SafetyAtWork} />
           <RootNav.Screen name="VoiceRecordings" component={VoiceRecordings} />
@@ -138,6 +138,11 @@ function MyTabBar({state, descriptors, navigation}) {
           iconName = isFocused ? 'alert-triangle' : 'alert-triangle';
           color = isFocused ? Color.black : Color.black;
           type = Feather;
+        } else{
+          iconName = isFocused ? 'settings-outline' : 'settings-outline';
+          type = Ionicons;
+          color = isFocused ? Color.black : Color.black;
+          size = isFocused ? moderateScale(30, 0.3) : moderateScale(25, 0.3);
         }
         return route.name == 'SafetyAtWork' ? (
           <View
@@ -156,8 +161,9 @@ function MyTabBar({state, descriptors, navigation}) {
               
             }}>
             <PlatformPressable
-          pressOpacity={1}
-          android_ripple={{color:"#0000000C",                 borderRadius: (windowHeight * 0.08) / 2,}}
+          pressOpacity={0.2}
+          android_ripple={{color:"transparent",                
+          radius: (windowHeight * 0.08) / 2,}}
               onPress={onPress}
               onLongPress={onLongPress}
               style={{
@@ -173,7 +179,8 @@ function MyTabBar({state, descriptors, navigation}) {
                 position: 'absolute',
                 bottom: moderateScale(15, 0.6),
               }}>
-              <Icon name={iconName} as={type} color={color} size={size} />
+              {/* <Icon name={iconName} as={type} color={color} size={size} /> */}
+            <Image tintColor={Color.black}  source={require('./Assets/Images/women1.png')} />
             </PlatformPressable>
           </View>
         ) : route.name == 'VoiceRecordings' ? (
@@ -328,9 +335,10 @@ export const TabNavigation = () => {
       })}>
       <Tabs.Screen name={'Home'} component={Home} />
       <Tabs.Screen name={'VoiceRecordings'} component={VoiceRecordings} />
+      {/* <Tabs.Screen name={'Profile'} component={Profile} /> */}
       <Tabs.Screen name="SafetyAtWork" component={SafetyAtWork} />
-      <Tabs.Screen name={'Profile'} component={Profile} />
       <Tabs.Screen name={'Contacts'} component={ContactsScreen} />
+      <Tabs.Screen name={'Settings'} component={Settings} />
     </Tabs.Navigator>
   );
 };

@@ -10,7 +10,7 @@ import Header from '../Components/Header';
 const SafetyAtWork = () => {
   return (
     <>
-    <Header  headerColor={"#FFECD0"} showBack 
+    <Header  headerColor={"#FFECD0"} showBack={false} 
     textstyle={{fontWeight: "bold"}}
     title={"Safety At Work"} titleImage={require("../Assets/Images/women1.png")}/>
     <ScrollView>

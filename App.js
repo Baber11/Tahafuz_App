@@ -12,9 +12,15 @@ import Contacts from './SRC/Screens/Contacts';
 import Profile from './SRC/Screens/Profile';
 import Home from './SRC/Screens/Home';
 import VoiceRecordings from './SRC/Screens/VoiceRecordings';
+import RNShake from 'react-native-shake';
+
 import { requestCameraPermission, requestContactsPermission, requestLocationPermission, requestWritePermission } from './SRC/Utillity/utils';
+import { Alert } from 'react-native';
 
 const App = () =>{
+
+
+
     return (
       <NativeBaseProvider>
 
@@ -29,6 +35,15 @@ const App = () =>{
 
 
 const MainContainer = () => {
+  useEffect(()=>{
+   const subscripton = RNShake.addListener(()=>{
+      
+    Alert.alert("Shake event Detected!");
+    console.log("Shake ===> ");
+    })
+    return subscripton.remove();
+  },[])
+
   useEffect(() => {
     async function GetPermission() {
       
