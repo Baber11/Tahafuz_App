@@ -1,23 +1,17 @@
+import { Icon, Progress } from 'native-base';
 import React, { useEffect, useState } from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {moderateScale} from 'react-native-size-matters';
-import CustomText from '../Components/CustomText';
-import {windowHeight, windowWidth} from '../Utillity/utils';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Octicons from 'react-native-vector-icons/Octicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { moderateScale } from 'react-native-size-matters';
+import TrackPlayer, { State, usePlaybackState, useProgress } from 'react-native-track-player';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import {Icon, Progress} from 'native-base';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Octicons from 'react-native-vector-icons/Octicons';
 import Color from '../Assets/Utilities/Color';
+import CustomText from '../Components/CustomText';
 import Header from '../Components/Header';
-import {useNavigation} from '@react-navigation/native';
-import CustomImage from '../Components/CustomImage';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { addTracks, setupPlayer } from '../Utillity/trackPlayerServices';
-import TrackPlayer, {State, usePlaybackState, useProgress} from 'react-native-track-player';
-import { freeze } from '@reduxjs/toolkit';
+import { windowHeight, windowWidth } from '../Utillity/utils';
 
 const VoiceRecordings = () => {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -72,11 +66,9 @@ const VoiceRecordings = () => {
 
     async function handlePlayPress(trackId, trackFile) {
       if (currentTrack === trackId && playing.state === State.Playing) {
-        // console.log("🚀 ~ handlePlayPress ~ playing:", playing)
-        // Pause if the same track is already playing
+     
         await TrackPlayer.pause();
       } else {
-        // Stop current track if any
         if (playing.state === State.Playing || playing.state === State.Paused) {
           await TrackPlayer.stop();
         }
@@ -176,8 +168,9 @@ const VoiceRecordings = () => {
                   <CustomText>{item.date}</CustomText>
                 </View>
                 <View style={styles.ListTile}>
-                  <View style={styles.leading}>
+                  {/* <View > */}
                  <TouchableOpacity 
+                 style={styles.leading}
                   onPress={() => handlePlayPress(item.id, item.file)}
                  
                  >
@@ -189,13 +182,9 @@ const VoiceRecordings = () => {
                   size={moderateScale(14, 0.3)}
                   />
                   </TouchableOpacity>
-                  </View>
+                  {/* </View> */}
                   <View style={styles.imageContainer}>
-                    {/* <CustomImage
-                      source={require('../Assets/Images/waves.png')}
-                      style={[styles.image,  ]}
-                      resizeMode={'contain'}
-                    /> */}
+                 
                       <Progress 
                       style={{width:"100%", 
                       
@@ -204,15 +193,6 @@ const VoiceRecordings = () => {
                         // `${duration > 0 ? (position / duration) * 100 : 0}`
                         trackProgresses[item.id] || 0
                         } />
-                            {/* <View style={[styles.overlay, 
-                              { width: `${duration > 0 ? (position / duration) * 100 : 0}%` }]}>
-                                  <LinearGradient
-            colors={['#BF55EC', '#FF3974']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradient}
-          />
-                              </View>  */}
 
                   </View>
                   <CustomText>  {currentTrack === item.id 

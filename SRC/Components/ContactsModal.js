@@ -1,17 +1,16 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
-import Modal from 'react-native-modal';
-import Color from '../Assets/Utilities/Color';
-import TextInputWithTitle from './TextInputWithTitle';
-import {moderateScale} from 'react-native-size-matters';
-import CustomText from './CustomText';
-import {windowHeight, windowWidth} from '../Utillity/utils';
+import { Avatar, Icon } from 'native-base';
+import React, { useState } from 'react';
+import { Alert, FlatList, Platform, ScrollView, StyleSheet, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {Avatar, Icon} from 'native-base';
+import Modal from 'react-native-modal';
+import { moderateScale } from 'react-native-size-matters';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Color from '../Assets/Utilities/Color';
+import { windowHeight, windowWidth } from '../Utillity/utils';
 import CustomButton from './CustomButton';
-import {position} from 'native-base/lib/typescript/theme/styled-system';
+import CustomText from './CustomText';
+import TextInputWithTitle from './TextInputWithTitle';
 
 const ContactsModal = ({
   modalIsVisible,
@@ -32,6 +31,7 @@ const ContactsModal = ({
         setModalIsVisible(false);
         setSelectedContacts([]);
       }}>
+      <ScrollView>
       <LinearGradient
         colors={['#FFECD0', '#FF3974CC']}
         start={{x: 0.7, y: 0.7}}
@@ -78,13 +78,18 @@ const ContactsModal = ({
               <TouchableOpacity
                 style={styles.contactItem}
                 onPress={() => {
-                  if (
+                 if(selectedContacts?.length > 5 && !selectedContacts?.some(contact => contact?.id == item?.id)){
+                    return Platform.OS == "android" ? 
+                    ToastAndroid.show("You can only Select Five contacts.", ToastAndroid.SHORT) :
+                    Alert.alert("You can only Select Five contacts.")
+                 }
+                  else if (
                     selectedContacts?.some(contact => contact?.id == item?.id)
                   ) {
                     setSelectedContacts(prev =>
                       prev.filter(item1 => item1?.id !== item?.id),
                     );
-                  } else {
+                  }  else {
                     setSelectedContacts(prev => [...prev, item]);
                   }
                   console.log(item);
@@ -92,7 +97,17 @@ const ContactsModal = ({
                 }}>
                 <Avatar
                   source={{uri: item?.photo}}
-                  backgroundColor={Color.black}
+                 
+                  backgroundColor={"#80453DFF"}
+                children={
+                  !item?.photo && item?.name ? (
+                    <CustomText 
+                    // isBold
+                    style={{ color: 'white', fontSize: moderateScale(18,0.2) }}>
+                      {item.name.charAt(0).toUpperCase()}
+                    </CustomText>
+                  ) : null
+                }
                 />
                 <View style={styles.details}>
                   <CustomText isBold>{item?.name}</CustomText>
@@ -149,6 +164,8 @@ const ContactsModal = ({
           />
         )}
       </LinearGradient>
+      </ScrollView>  
+
     </Modal>
   );
 };
@@ -173,8 +190,8 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(5, 0.3),
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal:moderateScale(10,0.2),
     gap: moderateScale(11, 0.3),
-
     // margin
   },
   details: {

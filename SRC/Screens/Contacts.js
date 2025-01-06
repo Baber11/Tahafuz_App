@@ -1,21 +1,17 @@
-import { FlatList, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { useIsFocused } from '@react-navigation/native'
+import { Avatar, Icon } from 'native-base'
 import React, { useEffect, useState } from 'react'
-import Header from '../Components/Header'
+import { FlatList, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
+import Contacts from 'react-native-contacts'
 import LinearGradient from 'react-native-linear-gradient'
 import { moderateScale } from 'react-native-size-matters'
-import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils';
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import Octicons from "react-native-vector-icons/Octicons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import FontAwesome6 from "react-native-vector-icons/FontAwesome6";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { Avatar, Icon } from 'native-base'
-import CustomText from '../Components/CustomText'
-import Color from '../Assets/Utilities/Color';
-import Contacts from 'react-native-contacts';
-import { useIsFocused } from '@react-navigation/native'
+import AntDesign from "react-native-vector-icons/AntDesign"
+import FontAwesome6 from "react-native-vector-icons/FontAwesome6"
+import Color from '../Assets/Utilities/Color'
 import ContactsModal from '../Components/ContactsModal'
+import CustomText from '../Components/CustomText'
+import Header from '../Components/Header'
+import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils'
 
 
 const ContactsScreen = () => {
@@ -63,6 +59,7 @@ const ContactsScreen = () => {
     }
     checkpermissions()
   },[isFocused])
+
 useEffect(()=>{
   const getContacts = async () =>{
     const contatcsData= await Contacts.getAll();
@@ -76,45 +73,7 @@ useEffect(()=>{
   }
   getContacts()
 },[isFocused])
-  const settingsArray =[
-      {
-      id:1,
-      name:"Mir MUhammad",
-      phone:"0325-2968018",
-    
-      onPress: () =>{}
-    },
-      {
-      id:2,
-      name:"Muhammad Umair",
-      phone:"0325-2968018",
-      onPress: () =>{
-      }
-    },
-      {
-      id:3,
-      name:"Umees Ur Rehman",
-      phone:"0325-2968018",
-      iconType: MaterialCommunityIcons,
-      onPress: () =>{}
-    },
-      {
-      id:4,
-      name:"Muhammad Huzaifa",
-      phone:"0325-2968018",
-      // iconName:"exclamationcircleo",
-      // iconType: AntDesign,
-      onPress: () =>{}
-    },
-      {
-      id:5,
-      name:"Muhammad Sumama",
-      phone:"0325-2968018",
-      // iconName:"logout",
-      // iconType: MaterialCommunityIcons,
-      onPress: () =>{}
-    }
-  ]
+
   return (
     <>
         <Header 
@@ -135,11 +94,6 @@ useEffect(()=>{
           <FlatList 
            keyExtractor={item => item.id}
            data={contacts}
-          //  style={{width: windowWidth * 0.85}}
-          //  contentContainerStyle={{
-          //   alignItems:"center",
-          //   justifyContent:'center'
-          //  }}
            renderItem={({item,index}) =>{
             return(
                 <TouchableOpacity
@@ -224,7 +178,7 @@ borderColor:"rgba(255, 255, 255, 0.19)"
 },
 ListTile:{
     flexDirection:"row",
-    paddingHorizontal:moderateScale(5,0.3),
+    paddingHorizontal:moderateScale(8,0.3),
     // width: windowWidth * 0.9,
     // backgroundColor:"red",
     gap:moderateScale(18,0.2),

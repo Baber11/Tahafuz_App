@@ -1,15 +1,16 @@
-import {Linking, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import Header from '../Components/Header';
-import {moderateScale} from 'react-native-size-matters';
-import {windowHeight, windowWidth} from '../Utillity/utils';
-import LinearGradient from 'react-native-linear-gradient';
-import CustomText from '../Components/CustomText';
-import CustomImage from '../Components/CustomImage';
-import CustomButton from '../Components/CustomButton';
+import React, { useEffect } from 'react';
+import { FlatList, Linking, StyleSheet, View } from 'react-native';
 import GetLocation from 'react-native-get-location';
-import {useDispatch} from 'react-redux';
-import {setLocation} from '../Store/slices/common';
+import LinearGradient from 'react-native-linear-gradient';
+import { moderateScale } from 'react-native-size-matters';
+import { useDispatch } from 'react-redux';
+import CustomButton from '../Components/CustomButton';
+import CustomImage from '../Components/CustomImage';
+import CustomText from '../Components/CustomText';
+import Header from '../Components/Header';
+import { setLocation } from '../Store/slices/common';
+import { windowHeight, windowWidth } from '../Utillity/utils';
+
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -57,6 +58,8 @@ const Home = () => {
       image: require('../Assets/Images/police.png'), // Replace with your actual path
     },
   ];
+
+
   return (
     <>
       <Header
@@ -104,48 +107,64 @@ const Home = () => {
             See More
           </CustomText>
         </View>
-        <LinearGradient
-          colors={['#FC4A1ACC', '#F7B733CC']}
-          start={{x: 0.5, y: 0.1}}
-          end={{x: 0.6, y: 0.5}}
-          style={styles.emergencyCard}>
-          <CustomImage
-            source={require('../Assets/Images/Alert.png')}
-            // style={{width: mod}}
-          />
-          <CustomText style={{color: Color.white}} isBold>
-            Active Emergency
-          </CustomText>
-          <CustomText style={{color: Color.white}} isBold>
-            Call 1-5 for Emergency
-          </CustomText>
-          <View style={styles.emergencyNumbContainer}>
-            {[15, 115, 1020, 16, 1101, 915].map((phoneNumber, index) => (
-              <CustomButton
-                text={phoneNumber}
-                alignSelf="flex-start"
-                bgColor={Color.white}
-                borderColor={'white'}
-                borderRadius={moderateScale(24, 0.4)}
-                borderWidth={1}
-                textColor={'#FC4A1ACC'}
-                onPress={() => {
-                  const url = `tel:${phoneNumber}`;
-                  Linking.openURL(url).catch(err =>
-                    console.error('Failed to open dial pad:', err),
-                  );
-                }}
-                width={windowWidth * 0.2}
-                height={windowHeight * 0.04}
-                fontSize={moderateScale(24, 0.3)}
-                textTransform={'none'}
-                isGradient={false}
-                isBold
-                //    marginTop={moderateScale(30, 0.3)}
-              />
-            ))}
-          </View>
-        </LinearGradient>
+       <View style={{paddingVertical:moderateScale(30,0.2)}}>
+        <FlatList
+              contentContainerStyle={{
+                gap:moderateScale(20,0.2),
+                }}  
+              horizontal
+                data={[15, 115, 1020, 16, 1101, 915]}
+              renderItem={({item, index})=>{
+                return(
+                  <LinearGradient
+                  colors={['#FC4A1ACC', '#F7B733CC']}
+                  start={{x: 0.5, y: 0.1}}
+                  end={{x: 0.6, y: 0.5}}
+                  
+                  style={styles.emergencyCard}>
+                  <CustomImage
+                    source={require('../Assets/Images/Alert.png')}
+                    // style={{width: mod}}
+                  />
+                  <CustomText style={{color: Color.white}} isBold>
+                    Active Emergency
+                  </CustomText>
+                  <CustomText style={{color: Color.white}} isBold>
+                    Call 1-5 for Emergency
+                  </CustomText>
+                  <View style={styles.emergencyNumbContainer}>
+                    
+                      <CustomButton
+                        text={item}
+                        alignSelf="flex-start"
+                        bgColor={Color.white}
+                        borderColor={'white'}
+                        borderRadius={moderateScale(24, 0.4)}
+                        borderWidth={1}
+                        textColor={'#FC4A1ACC'}
+                        onPress={() => {
+                          const url = `tel:${item}`;
+                          Linking.openURL(url).catch(err =>
+                            console.error('Failed to open dial pad:', err),
+                          );
+                        }}
+                        width={windowWidth * 0.2}
+                        height={windowHeight * 0.04}
+                        fontSize={moderateScale(24, 0.3)}
+                        textTransform={'none'}
+                        isGradient={false}
+                        isBold
+                        //    marginTop={moderateScale(30, 0.3)}
+                      />
+                    
+                  </View>
+                </LinearGradient>
+                )
+              }}
+              
+            />
+        </View> 
+      
 
         <CustomText style={styles.title} isBold>
           Explore Live Safe
@@ -195,6 +214,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     gap: moderateScale(10, 0.2),
     justifyContent: 'center',
+    // alignItems:"center",
     marginTop: moderateScale(10, 0.2),
     // paddingVertical:moderateScale(15,0.2),
     overflow: 'hidden',
@@ -216,7 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(20, 0.3),
   },
   textContainer: {
-    width: windowWidth * 0.34,
+    width: "45%",
     justifyContent: 'center',
     marginLeftLeft: moderateScale(12, 0.2),
     paddingLeft: moderateScale(17, 0.2),
