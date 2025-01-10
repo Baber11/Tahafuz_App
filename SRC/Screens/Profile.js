@@ -1,9 +1,9 @@
-import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import Header from '../Components/Header'
 import LinearGradient from 'react-native-linear-gradient'
 import { moderateScale } from 'react-native-size-matters'
-import { windowHeight, windowWidth } from '../Utillity/utils';
+import { apiHeader, windowHeight, windowWidth } from '../Utillity/utils';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Octicons from "react-native-vector-icons/Octicons";
@@ -17,12 +17,56 @@ import Color from '../Assets/Utilities/Color'
 import CustomImage from '../Components/CustomImage'
 import TextInputWithTitle from '../Components/TextInputWithTitle'
 import CustomButton from '../Components/CustomButton'
+import { useDispatch, useSelector } from 'react-redux'
+import ImagePickerModal from '../Components/ImagePickerModal'
+import { Post } from '../Axios/AxiosInterceptorFunction'
+import { setUserData } from '../Store/slices/common'
+import { useNavigation } from '@react-navigation/native'
 
 const Profile = () => {
-  const [name, setName] = useState('Emily Devis');
-  // const [lastName,setLastName] = useState("")
-  const [email, setEmail] = useState('abc@gmail.com');
-  const [phoneNum, setPhoneNum] = useState('090078601');
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const userData= useSelector(state => state.commonReducer.userData);
+  const token = useSelector(state => state.authReducer.token);
+  console.log("🚀 ~ Profile ~ userData:", JSON.stringify(userData,null,2));
+  const [name, setName] = useState(userData?.full_name ?? "");
+  const [email, setEmail] = useState(userData?.email ?? "");
+  const [phoneNum, setPhoneNum] = useState(userData?.phone ?? "");
+  const [photo, setPhoto] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
+  
+  const updateProfile = async () =>{
+    const url="auth/profile";
+    const body = {
+      full_name:name,
+      phone: phoneNum
+    };
+    
+    const formData = new FormData();
+    
+    for (let key in body){
+      if(body[key] == " "){
+        return ToastAndroid.show(`${key} must not be empty.`, ToastAndroid.SHORT);
+      } else{
+        formData.append(key, body[key]);
+      }
+    }
+    if(Object.keys(photo).length > 0){
+      formData.append("photo", photo);
+    }
+    setIsLoading(true);
+    const response = await Post(url, formData, apiHeader(token));
+    setIsLoading(false);
+    if(response != undefined ){
+      dispatch(setUserData(response?.data?.user_info))
+      ToastAndroid.show("Profile UPdated Successfully!", ToastAndroid.SHORT);
+      navigation.goBack();
+      console.log("🚀 ~ updateProfile ~ response:", JSON.stringify(response?.data,null,2)); 
+    }
+
+  }
+
   
   return (
     <>
@@ -44,16 +88,16 @@ const Profile = () => {
     style={styles.main}
     >
         <View style={styles.mainSettings}>
-          <>
+        <View>
         <View style={styles.profileImage}>
           <CustomImage 
           style={styles.image}
-          source={{uri:"https://randomuser.me/api/portraits/women/4.jpg"}}
+          source={{uri: Object.keys(photo).length == 0 ? userData?.photo :  photo?.uri}}
           />
-        </View>
+        </View>                
            <TouchableOpacity
               onPress={() => {
-                // setShowModal(true);
+                setShowModal(true);
               }}
               style={styles.edit}>
               <Icon
@@ -62,11 +106,12 @@ const Profile = () => {
                 style={styles.icon2}
                 color={Color.white}
                 size={moderateScale(16, 0.3)}
-              />
+                />
             </TouchableOpacity>
-            </>
+          </View>  
+            
 
-       <CustomText style={{fontSize:moderateScale(24,0.3)}} isBold>{name}</CustomText>
+       <CustomText style={{fontSize:moderateScale(24,0.3)}} isBold>{userData?.full_name}</CustomText>
         <View style={styles.form}>
       
         <TextInputWithTitle
@@ -86,7 +131,6 @@ const Profile = () => {
           color={"#d4850e"}
           placeholderColor={Color.white}
           borderRadius={moderateScale(10, 0.4)}
-          disable
         />
         <TextInputWithTitle
           title={'Email'}
@@ -105,7 +149,7 @@ const Profile = () => {
           borderColor={"#bd8024"}
           placeholderColor={Color.white}
           borderRadius={moderateScale(10, 0.4)}
-          // disable
+          disable
         />
          <TextInputWithTitle
           title={'Phone'}
@@ -120,22 +164,20 @@ const Profile = () => {
           border={1}
           borderColor={"#bd8024"}
           backgroundColor={"#f7d29c"}
-
           marginTop={moderateScale(12, 0.3)}
-          color={"#925f13"}
+          color={"#bd8024"}
           placeholderColor={"#d4850e"}
           borderRadius={moderateScale(10, 0.4)}
-          // disable
         />
            <CustomButton
-        text={"Edit"}
+        text={ isLoading ? <ActivityIndicator color={"white"} size={moderateScale(24,0.3)}/> : "Edit"}
         bgColor={"#FF3974CC"}
             borderColor={'white'}
             borderRadius={moderateScale(10, 0.4)}
             borderWidth={1}
             textColor={Color.white}
             onPress={() => {
-
+              updateProfile()
             }}
             width={windowWidth * 0.35}
             height={windowHeight * 0.06}
@@ -144,10 +186,16 @@ const Profile = () => {
             isGradient={false}
             isBold
             marginTop={moderateScale(30, 0.3)}
+            disabled={isLoading}
         />
         </View>
         </View>
     </LinearGradient>
+    <ImagePickerModal
+          show={showModal}
+          setShow={setShowModal}
+          setFileObject={setPhoto}
+        />
     {/* </ScrollView> */}
     </>
   )
@@ -192,13 +240,13 @@ image:{
 },
 edit: {
   backgroundColor: "#FF3974CC",
-  width: moderateScale(25, 0.3),
-  height: moderateScale(25, 0.3),
-  position: 'absolute',
-  top:moderateScale(175,0.2),
+  width: moderateScale(30, 0.3),
+  height: moderateScale(30, 0.3),
+  // position: 'absolute',
+  top:moderateScale(-25,0.2),
   // bottom: moderateScale(5, 0.3),
-  right: moderateScale(120, 0.3),
-  borderRadius: moderateScale(12.5, 0.3),
+  right: moderateScale(-80, 0.3),
+  borderRadius: moderateScale(15, 0.3),
   elevation: 8,
   zIndex:1,
   justifyContent: 'center',

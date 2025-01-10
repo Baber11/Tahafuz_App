@@ -89,7 +89,7 @@ const requestWritePermission = async () => {
   }
 };
 
-const apiHeader = (token, isFormData) => {
+const apiHeader = (token, isFormData =true) => {
   if (token && !isFormData) {
     return {
       headers: {

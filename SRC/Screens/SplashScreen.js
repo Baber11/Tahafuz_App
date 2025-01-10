@@ -17,14 +17,12 @@ const SplashScreen = () => {
 
       <View style={styles.logo_Container}>
         <CustomImage
-          source={require('../Assets/Images/Heart2.png')}
+          source={require('../Assets/Images/logo.png')}
           style={styles.logo}
           resizeMode={"contain"}
         />
       </View>
-      <CustomText style={styles.LogoText}>
-        APP LOGO HERE
-      </CustomText>
+
     </ImageBackground>
   );
 };

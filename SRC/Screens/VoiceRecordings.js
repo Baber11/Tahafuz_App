@@ -21,16 +21,6 @@ const VoiceRecordings = () => {
   
   const {position, duration} = useProgress(1000);
   const playing=  usePlaybackState();
-  async function handlePlayPress() {
-   const {state} = await TrackPlayer.getPlaybackState()
-    if(state == State.Playing) {
-      TrackPlayer.pause();
-    }
-    else {
-      TrackPlayer.play();
-    }
-  }
-
   useEffect(()=>{
     console.log("position >= duration", format(position),format(duration) ,format(position) >= format(duration) )
   async function  handePausePlayerOnEnd(){
@@ -61,13 +51,12 @@ const VoiceRecordings = () => {
 
     async function handlePlayPress(trackId, trackFile) {
       if (currentTrack === trackId && playing.state === State.Playing) {
-     
         await TrackPlayer.pause();
       } else {
         if (playing.state === State.Playing || playing.state === State.Paused) {
           await TrackPlayer.stop();
         }
-  
+
         await TrackPlayer.reset();
         
         await TrackPlayer.add({
@@ -188,7 +177,7 @@ const VoiceRecordings = () => {
                         } />
 
                   </View>
-                  <CustomText>  {currentTrack === item.id 
+                  <CustomText style={{fontSize:moderateScale(11,0.2)}}>  {currentTrack === item.id 
           ? `${format(position)} / ${format(duration)}` 
           : `00:00 / ${format(item.duration || 0)}`}</CustomText>
                 </View>
@@ -257,7 +246,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0.2, height: 10.6},
   },
   imageContainer: {
-    width: windowWidth * 0.4,
+    width: windowWidth * 0.35,
     height: windowWidth * 0.25,
     // alignItems:"center",
     // backgroundColor:"red",

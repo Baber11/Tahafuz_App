@@ -74,6 +74,7 @@ let Get = async (route, token, showAlert = true) => {
  */
 
 let Post = async (route, data, headers, showAlert = true) => {
+  console.log("🚀 ~ Post ~ headers:", headers)
   const apiUrl = URL(route);
   console.log('here is the url =>', apiUrl);
 

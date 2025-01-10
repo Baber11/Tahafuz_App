@@ -53,6 +53,7 @@ const ImagePickerModal = props => {
         setShow(false);
       }
       if (response.didCancel) {
+        console.log("Cancel")
       } else if (response.error) {
       } else if (response.customButton) {
         alert(response.customButton);
@@ -95,7 +96,14 @@ const ImagePickerModal = props => {
     launchCamera(options, response => {
       if (Platform.OS == 'ios') {
         setShow(false);
-      } else {
+      } 
+      if (response.didCancel) {
+        console.log("Cancel")
+      } else if (response.error) {
+      } else if (response.customButton) {
+        alert(response.customButton);
+      } 
+      else {
         setFileObject &&
           setFileObject({
             uri: response?.assets[0]?.uri,
@@ -130,7 +138,7 @@ const ImagePickerModal = props => {
       }}>
       <View
         style={{
-          backgroundColor: Color.white,
+          backgroundColor: "#FFECD0",
           height: Dimensions.get('window').height * 0.33,
           width: Dimensions.get('window').width * 0.8,
           paddingHorizontal: moderateScale(10, 0.3),
@@ -257,6 +265,7 @@ const styles = ScaledSheet.create({
   modalHead: {
     fontSize: moderateScale(15, 0.3),
     fontWeight: 'bold',
+    color:"#FF3974CC",
     marginBottom: moderateScale(7.5, 0.3),
   },
   modalContentContianer: {
@@ -265,13 +274,13 @@ const styles = ScaledSheet.create({
     alignItems: 'center',
     alignContent: 'center',
     height: windowHeight * 0.21,
-    borderBottomColor: Color.themeColor,
+    borderBottomColor: "#FF3974CC",
     borderBottomWidth: 2,
-    borderTopColor: Color.themeColor,
+    borderTopColor: "#FF3974CC",
     borderTopWidth: 2,
   },
   modalContentBtn: {
-    backgroundColor: Color.themeBlack,
+    backgroundColor: "#FF3974CC",
     alignItems: 'center',
     paddingHorizontal: windowWidth * 0.08,
     paddingVertical: windowHeight * 0.02,
@@ -283,7 +292,7 @@ const styles = ScaledSheet.create({
     fontSize: moderateScale(12, 0.3),
   },
   modalCancelBtn: {
-    backgroundColor: Color.themeBlack,
+    backgroundColor: "#FF3974CC",
     paddingVertical: windowHeight * 0.008,
     width: windowWidth * 0.2,
     alignItems: 'center',

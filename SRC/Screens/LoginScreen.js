@@ -1,23 +1,55 @@
 import React, { useState } from 'react';
-import { ImageBackground, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, ImageBackground, Platform, StyleSheet, ToastAndroid, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Color from '../Assets/Utilities/Color';
 import CustomButton from '../Components/CustomButton';
 import CustomImage from '../Components/CustomImage';
 import CustomText from '../Components/CustomText';
 import TextInputWithTitle from '../Components/TextInputWithTitle';
-import { windowHeight, windowWidth } from '../Utillity/utils';
+import { apiHeader, windowHeight, windowWidth } from '../Utillity/utils';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setUserToken } from '../Store/slices/auth';
+import { Post } from '../Axios/AxiosInterceptorFunction';
+import { setUserData } from '../Store/slices/common';
+import { ScrollView } from 'native-base';
 
 const LoginScreen = () => {
   const navigation= useNavigation();
   const dispatch = useDispatch();
+  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const login = async () => {
+    const url = 'login';
+    const body = {email: email, password: password };
+
+    for (let key in body) {
+      if (body[key] == '') {
+        return Platform.OS == 'android'
+          ? ToastAndroid.show(`${key} is required`, ToastAndroid.SHORT)
+          : Alert.alert(`${key} is required`);
+      }
+    }
+
+    setIsLoading(true);
+    const response = await Post(url, body, apiHeader());
+    setIsLoading(false);
+    if (response != undefined) {
+     
+
+      dispatch(setUserToken({token: response?.data?.token}));
+      dispatch(setUserData(response?.data?.user_info));
+      // dispatch(setUserWallet(response?.data?.user_info?.wallet));
+    }
+  };
+
 
   return (
+    <ScrollView showsVerticalScrollIndicator={false}>
     <ImageBackground
       source={require('../Assets/Images/bg3.png')}
       style={styles.main}
@@ -49,7 +81,6 @@ const LoginScreen = () => {
           color={Color.white}
           placeholderColor={Color.white}
           borderRadius={moderateScale(10, 0.4)}
-          disable
         />
         <TextInputWithTitle
           title={'Password'}
@@ -67,9 +98,8 @@ const LoginScreen = () => {
           color={Color.white}
           placeholderColor={Color.white}
           borderRadius={moderateScale(10, 0.4)}
-          disable
         />
-        <CustomText style={styles.actionTextBtn}>Forgot Password?</CustomText>
+        {/* <CustomText style={styles.actionTextBtn}>Forgot Password?</CustomText> */}
 
         {/* <View style={styles.socialButtons}>
           <View style={styles.socialbtn}>
@@ -100,15 +130,14 @@ const LoginScreen = () => {
         }}>New Here? Sign Up</CustomText>
 
         <CustomButton
-        text={"Login"}
+        text={isLoading ? <ActivityIndicator color={"white"} size={moderateScale(24,0.3)}/>  :  "Login"}
         bgColor={"#FFECD0"}
             // borderColor={'white'}
             borderRadius={moderateScale(10, 0.4)}
             // borderWidth={1}
             textColor={Color.black}
             onPress={() => {
-              dispatch(setUserToken({token:"abcedfe"}))
-              // navigation.navigate("TabNavigation")
+              login()
             
             }}
             width={windowWidth * 0.35}
@@ -119,11 +148,15 @@ const LoginScreen = () => {
             isBold
             elevation={4}
             marginTop={moderateScale(30, 0.3)}
+            disabled={isLoading}
+
         />
 
         </View>
       </View>
     </ImageBackground>
+
+    </ScrollView>
   );
 };
 

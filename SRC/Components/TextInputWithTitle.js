@@ -8,7 +8,8 @@ import {
   View
 } from 'react-native';
 
-// import { Icon } from 'native-base';
+import { Icon } from 'native-base';
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { useState } from 'react';
 import { moderateScale, ScaledSheet } from 'react-native-size-matters';
 import Foundation from 'react-native-vector-icons/Foundation';
@@ -148,9 +149,15 @@ const TextInputWithTitle = props => {
                           : moderateScale(12, 0.6),
                         fontWeight: '400',
                       },
+                      props?.color && {
+                        color: props?.color
+                      },
                     ]
                   : [
                       styles.inputBox,
+                      props?.color && {
+                        color: props?.color
+                      },
                       {
                         paddingBottom: 0,
                       },
@@ -183,12 +190,12 @@ const TextInputWithTitle = props => {
                 // backgroundColor: "red",
               }}>
               {/* <IconComponent name={showPassword ? open_eye : close_eye} fill={Color.white}/> */}
-              {/* <Icon
+              <Icon
                 name={showPassword ? 'eye' : 'eye-slash'}
                 as={FontAwesome}
-                color={Color.black}
+                color={props?.color}
                 size={moderateScale(18, 0.3)}
-              /> */}
+              />
             </TouchableOpacity>
           </>
         ) : (
@@ -217,7 +224,7 @@ const TextInputWithTitle = props => {
                   marginLeft: moderateScale(15, 0.3),
                 },
                 props.color && {
-                  color: Color.black,
+                  color: props?.color,
                 },
                 props.inputColor && {
                   color: props.inputColor,

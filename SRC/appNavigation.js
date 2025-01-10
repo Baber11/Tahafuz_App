@@ -25,6 +25,7 @@ import Settings from './Screens/Settings';
 import SignUp from './Screens/SignUp';
 import VoiceRecordings from './Screens/VoiceRecordings';
 import { windowHeight, windowWidth } from './Utillity/utils';
+import ChangePassword from './Screens/ChangePassword';
 // import {createDrawerNavigator} from '@react-navigation/drawer';
 
 // enableScreens();
@@ -33,7 +34,9 @@ const AppNavigator = () => {
   const walkThrough = useSelector(state => state.authReducer.userWalkThrough);
   const role = useSelector(state => state.authReducer.role);
   const isVerified = useSelector(state => state.authReducer.isVerified);
+  const userData = useSelector(state => state.commonReducer.userData);
   const token = useSelector(state => state.authReducer.token);
+  console.log("🚀 ~ AppNavigator ~ token:", token)
 
   const RootNav = createNativeStackNavigator();
   const RootNavLogged = createNativeStackNavigator();
@@ -54,13 +57,13 @@ const AppNavigator = () => {
           <RootNav.Screen name="LoginScreen" component={LoginScreen} />
           <RootNav.Screen name="TabNavigation" component={TabNavigation} />
           <RootNav.Screen name={'Profile'} component={Profile} />
+          <RootNav.Screen name="ChangePassword" component={ChangePassword} />
           {/* <RootNav.Screen name="Home" component={Home} />
           <RootNav.Screen name="SafetyAtWork" component={SafetyAtWork} />
           <RootNav.Screen name="VoiceRecordings" component={VoiceRecordings} />
 
           // 
           // */}
-          {/* <RootNav.Screen name="ChangePassword" component={ChangePassword} /> */}
           <RootNav.Screen name="Signup" component={SignUp} />
           {/* <RootNav.Screen name="VerifyNumber" component={VerifyNumber} />
           <RootNav.Screen name="Profile" component={Profile} /> */}

@@ -13,14 +13,17 @@ import { Icon } from 'native-base'
 import Color from '../Assets/Utilities/Color'
 import Header from '../Components/Header'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setUserToken } from '../Store/slices/auth'
 import CustomImage from '../Components/CustomImage'
+import { setUserData } from '../Store/slices/common'
 
 const Settings = () => {
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const userData= useSelector(state => state.commonReducer.userData);
+
   const settingsArray =[
     {
     id:1,
@@ -49,18 +52,28 @@ const Settings = () => {
   },
     {
     id:4,
+    name:"Change Password",
+    iconName:"key-outline",
+    iconType: Ionicons,
+    onPress: () =>{
+      navigation.navigate("ChangePassword")
+    }
+  },
+    {
+    id:5,
     name:"About",
     iconName:"exclamationcircleo",
     iconType: AntDesign,
     onPress: () =>{}
   },
     {
-    id:5,
+    id:6,
     name:"Logout",
     iconName:"logout",
     iconType: MaterialCommunityIcons,
     onPress: () =>{
-      dispatch(setUserToken({}))
+      dispatch(setUserData({}))
+      dispatch(setUserToken(null))
     }
   }
 ]
@@ -84,7 +97,7 @@ const Settings = () => {
         <View style={styles.profileImage}>
           <CustomImage 
           style={styles.image}
-          source={{uri:"https://randomuser.me/api/portraits/women/4.jpg"}}
+          source={{uri:userData?.photo}}
           />
         </View>
          {settingsArray.map((item,index) =>{

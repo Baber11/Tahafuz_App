@@ -1,16 +1,18 @@
 import { Avatar, Icon } from 'native-base';
 import React, { useState } from 'react';
-import { Alert, FlatList, Platform, ScrollView, StyleSheet, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Platform, ScrollView, StyleSheet, ToastAndroid, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Modal from 'react-native-modal';
 import { moderateScale } from 'react-native-size-matters';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Color from '../Assets/Utilities/Color';
-import { windowHeight, windowWidth } from '../Utillity/utils';
+import { apiHeader, windowHeight, windowWidth } from '../Utillity/utils';
 import CustomButton from './CustomButton';
 import CustomText from './CustomText';
 import TextInputWithTitle from './TextInputWithTitle';
+import { Post } from '../Axios/AxiosInterceptorFunction';
+import { useSelector } from 'react-redux';
 
 const ContactsModal = ({
   modalIsVisible,
@@ -19,10 +21,43 @@ const ContactsModal = ({
   contacts,
   setContacts,
 }) => {
+  console.log("🚀 ~ contacts:", contacts)
+  const token = useSelector(state => state.authReducer.token);
   const [name, setName] = useState('');
   const [contactsData, setContactsData] = useState(data);
   const [selectedContacts, setSelectedContacts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  contacts.map((item,index) =>{
+    console.log("first  === > ", item)          
+    return (
+      selectedContacts.some(item1 => item1.number == item.number)
+    )
+   } )
+  const addContact = async () =>{
+    const url = "auth/contact";
 
+    const formData = new FormData();
+    if(selectedContacts.length > 0) {
+      selectedContacts?.map((item, index) =>{
+        formData.append(`contacts[${index}][name]`, item.name);
+        formData.append(`contacts[${index}][number]`, item.number);
+      })
+    }
+    setIsLoading(true);
+    const response = await Post(url, formData, apiHeader(token));
+    setIsLoading(false);
+
+    if(response != undefined){
+      setContacts(prevContacts => [
+        ...prevContacts,
+        ...response?.data?.data,
+      ]);
+      setSelectedContacts([]);
+      setModalIsVisible(false);
+    console.log("response ==> ", JSON.stringify(response?.data,null,2));
+    }
+
+  }
   console.log(selectedContacts?.some(contact => contact?.id !== 1));
   return (
     <Modal
@@ -137,7 +172,7 @@ const ContactsModal = ({
         />
         {selectedContacts?.length > 0 && (
           <CustomButton
-            text={'Add'}
+            text={isLoading ? <ActivityIndicator color={"white"} size={moderateScale(24,0.3)}/>  : 'Add'}
             bgColor={'#FFECD0'}
             borderColor={'white'}
             borderRadius={moderateScale(10, 0.4)}
@@ -147,13 +182,18 @@ const ContactsModal = ({
              if(contacts?.length >=5){
                 return ToastAndroid.show("You have already five contacts in your list.", ToastAndroid.SHORT);
              }
+             else if(contacts.some(item => selectedContacts.some(item1 => item1.number == item.number))){
+              return Alert.alert(`Contacts duplicated`)
+             }
+             else{
+              addContact()
+             }
               // navigation.navigate("Settings")
-              setContacts(prevContacts => [
-                ...prevContacts,
-                ...selectedContacts,
-              ]);
-              setSelectedContacts([]);
-              setModalIsVisible(false);
+              // setContacts(prevContacts => [
+              //   ...prevContacts,
+              //   ...selectedContacts,
+              // ]);
+
               //   dispatch(setUserToken({token:"abcedfe"}))
             }}
             width={windowWidth * 0.35}
@@ -164,6 +204,7 @@ const ContactsModal = ({
             style={{position: 'absolute', bottom: moderateScale(20, 0.3)}}
             isBold
             marginTop={moderateScale(30, 0.3)}
+            disabled={isLoading}
           />
         )}
       </LinearGradient>

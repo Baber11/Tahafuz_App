@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 // import moment from 'moment';
 
 const initialState = {
@@ -17,6 +17,7 @@ const initialState = {
   location: {},
   pickupLocatin: {},
   dropoffLocation: {},
+  background: false,
 };
 
 const CommonSlice = createSlice({
@@ -57,23 +58,21 @@ const CommonSlice = createSlice({
     AddToCart(state, action) {
       const itemId = action.payload.id;
       console.log('🚀 ~ AddToCart ~ action.payload:', action.payload);
-
       // state.cart.push({date: moment(), ...action.payload});
     },
-
+    Onbackground(state, action) {
+      state.background = action.payload;
+    },
     RemoveToCart(state, action) {
       const itemId = action.payload.id;
       state.cart = state.cart.filter((item, index) => item.id !== itemId);
     },
-
     EmptyCart(State, action) {
       State.cart = [];
     },
-
     Order(State, action) {
       State.order.push(action.payload);
     },
-
     increamentQuantity(state, action) {
       const itemId = action.payload.id;
       const itemAddCart = state.cart.find(item => item.id === itemId);
@@ -245,6 +244,7 @@ export const {
   setLocation,
   setPickupLocation,
   setDropoffLocation,
+  Onbackground,
 } = CommonSlice.actions;
 
 export default CommonSlice.reducer;

@@ -90,7 +90,7 @@ const CustomButton = props => {
           borderWidth: borderWidth,
         },
         disabled && {
-          backgroundColor: Color.themeLightGray,
+          backgroundColor: "#e6cba5",
           borderColor: Color.themeLightGray,
           color: Color.white,
         },

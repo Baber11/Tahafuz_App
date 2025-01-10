@@ -12,6 +12,7 @@ import { moderateScale, ScaledSheet } from 'react-native-size-matters';
 import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Color from '../Assets/Utilities/Color';
 import { windowHeight, windowWidth } from '../Utillity/utils';
 import CustomImage from './CustomImage';
@@ -46,6 +47,8 @@ const Header = props => {
     hideUser,
     headerRight,
     // navigation,
+    backgroundEventEnabled,
+    toggleBackgroundEvent,
     headerStyle,
     textstyle,
     isFilledButton,
@@ -202,8 +205,14 @@ const Header = props => {
             width: windowHeight * 0.055,
             justifyContent: 'center',
             alignItems: 'center',
+            flexDirection:"row",
+            gap:moderateScale(20,0.2),
             height: windowHeight * 0.055,
+            paddingHorizontal: backgroundEventEnabled ? moderateScale(15,0.3) :0,
           }}>
+            {backgroundEventEnabled && <Icon name={"power-off"} as={MaterialCommunityIcons}  
+            onPress={toggleBackgroundEvent}/>
+          }
             <Icon name={horizontalDots ? "dots-three-horizontal" :'dots-three-vertical'} as={Entypo}  
             onPress={horizontalDots ? ()=> {
               navigation.navigate("Settings")

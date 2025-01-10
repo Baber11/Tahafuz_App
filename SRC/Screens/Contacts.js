@@ -1,7 +1,7 @@
 import { useIsFocused } from '@react-navigation/native'
 import { Avatar, Icon } from 'native-base'
 import React, { useEffect, useState } from 'react'
-import { FlatList, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
 import Contacts from 'react-native-contacts'
 import LinearGradient from 'react-native-linear-gradient'
 import { moderateScale } from 'react-native-size-matters'
@@ -13,18 +13,18 @@ import CustomText from '../Components/CustomText'
 import Header from '../Components/Header'
 import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils'
 import CustomImage from '../Components/CustomImage'
+import { Get } from '../Axios/AxiosInterceptorFunction'
+import { useSelector } from 'react-redux'
 
 
 const ContactsScreen = () => {
   const isFocused = useIsFocused();
-
-  const [contacts, setContacts] = useState([
-   
-  ]);
+  const token = useSelector(state => state.authReducer.token);
+  const [contacts, setContacts] = useState([]);
   console.log("🚀 ~ ContactsScreen ~ contacts:", JSON.stringify(contacts,null,2))
   const [fetchedContacts , setFetchedContacts] = useState([]);
   const [modalIsVisible, setModalIsVisible] = useState(false)
-
+  const [isLoading, setIsLoading ] = useState(false);
   useEffect(()=>{
     const checkpermissions = async ()=>{
     const granted=  await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)
@@ -35,20 +35,35 @@ const ContactsScreen = () => {
     }
     checkpermissions()
   },[isFocused])
+const getContacts = async () =>{
+  const url= "auth/contact";
+  setIsLoading(true);
+  const response = await Get(url, token);
+  setIsLoading(false);
+  if(response != undefined){
+    setContacts(response?.data?.contacts_list);  
+  }
+    console.log("🚀 ~ getContacts ~ response?.data?.contacts_list:", response?.data?.contacts_list)
+}
+
+
 
 useEffect(()=>{
-  const getContacts = async () =>{
+  const getContactsFromPhone = async () =>{
     const contatcsData= await Contacts.getAll();
     setFetchedContacts(contatcsData?.map(item => ({
       id: item.recordID, 
       name: item.displayName,
       number: item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : '', 
-      photo: item.thumbnailPath ? item.thumbnailPath : null,
+      // photo: item.thumbnailPath ? item.thumbnailPath : null,
     })))
     console.log(JSON.stringify(fetchedContacts,null,2));
   }
-  getContacts()
+  getContactsFromPhone();
+  getContacts();
 },[isFocused])
+
+
 
   return (
     <>
@@ -66,61 +81,64 @@ useEffect(()=>{
     end={{x: 0.9, y:0.8 }}
     style={styles.main}
     >
-        <View style={[styles.mainSettings, contacts?.length == 0  && {
+        <View style={[styles.mainSettings, (contacts?.length == 0 || isLoading)  && {
           justifyContent:"center",
           alignItems:"center"
         }]}>
-          <FlatList 
-           keyExtractor={item => item.id}
-           data={contacts}
-           ListEmptyComponent={()=>{
-            return (
-              <View style={{width: "100%", 
-              paddingHorizontal:moderateScale(20,0.2),
-              height: windowHeight * 0.67, 
-              // backgroundColor:"red",
-              alignItems:"center", justifyContent:"center"}}>
-                <View style={{width: windowWidth * 0.25, height: windowWidth * 0.25, overflow:"hidden"}}>
-                <CustomImage 
-                style={{width:"100%", height:"100%"}}
-                // resizeMode={"contain"}
-                source={require("../Assets/Images/contacts.png")}/>
-                </View>  
-                <CustomText isBold>No Contacts Added yet.</CustomText>
-              </View>
-            )
-           }}
-           renderItem={({item,index}) =>{
-            return(
-                <TouchableOpacity
-                onPress={item?.onPress}
-                style={styles.ListTile}>
-               
-                    <Avatar 
+         { isLoading ? 
+          <ActivityIndicator color="#FF3974CC" size={"large"}/> 
+          : <FlatList 
+          keyExtractor={item => item.id}
+          data={contacts}
+          ListEmptyComponent={()=>{
+           return (
+             <View style={{width: "100%", 
+             paddingHorizontal:moderateScale(20,0.2),
+             height: windowHeight * 0.67, 
+             // backgroundColor:"red",
+             alignItems:"center", justifyContent:"center"}}>
+               <View style={{width: windowWidth * 0.25, height: windowWidth * 0.25, overflow:"hidden"}}>
+               <CustomImage 
+               style={{width:"100%", height:"100%"}}
+               // resizeMode={"contain"}
+               source={require("../Assets/Images/contacts.png")}/>
+               </View>  
+               <CustomText isBold>No Contacts Added yet.</CustomText>
+             </View>
+           )
+          }}
+          renderItem={({item,index}) =>{
+           return(
+               <TouchableOpacity
+               onPress={item?.onPress}
+               style={styles.ListTile}>
+              
+                   <Avatar 
 
-                    source={{uri: item?.photo }}
-                    backgroundColor={"#8f97a6"}
-                    >
-                                          <Icon as={FontAwesome6} name={"user"} 
-                     color={Color.white}
-                     size={moderateScale(24,0.3)}/> 
-                    </Avatar>
-                    <View style={styles.infoText}>
-                    <CustomText style={styles.title} isBold numberOfLines={1}>{item.name}</CustomText>
-                    <CustomText style={styles.phoneNum} isBold>{item.number}</CustomText>
-                </View>
-                {/* <View style={{width: windowWidth * 0.12}}> */}
+                   source={{uri: item?.photo }}
+                   backgroundColor={"#8f97a6"}
+                   >
+                                         <Icon as={FontAwesome6} name={"user"} 
+                    color={Color.white}
+                    size={moderateScale(24,0.3)}/> 
+                   </Avatar>
+                   <View style={styles.infoText}>
+                   <CustomText style={styles.title} isBold numberOfLines={1}>{item.name}</CustomText>
+                   <CustomText style={styles.phoneNum} isBold>{item.number}</CustomText>
+               </View>
+               {/* <View style={{width: windowWidth * 0.12}}> */}
 
-            <Icon as={FontAwesome6} name={"phone"} 
-                     color={Color.lightGreen}
-                     size={moderateScale(24,0.3)}/> 
+           <Icon as={FontAwesome6} name={"phone"} 
+                    color={Color.lightGreen}
+                    size={moderateScale(24,0.3)}/> 
+                  
                    
-                    
-                </TouchableOpacity>       
-            )
-         }}
-
-          />
+               </TouchableOpacity>       
+           )
+        }}
+         />
+        }
+       
 
          {/* {contacts.map()} */}
 
