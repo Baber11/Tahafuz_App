@@ -8,6 +8,8 @@ const initialState = {
   financeBreakDown: [],
   cart: [],
   bookings: [],
+  recordings:[],
+
   notification: false,
   order: [],
   sellerProducts: [],
@@ -30,6 +32,17 @@ const CommonSlice = createSlice({
     },
     setPickupLocation(state, action) {
       state.pickupLocatin = action.payload;
+    },
+    setRecordings(state,action){
+    console.log("🚀 ~ setRecordings ~ state:", state.recordings)
+    console.log("🚀 ~ setRecordings ~ action:", action.payload)
+    // if (!Array.isArray(state.recordings)) {
+    //   state.recordings = [];
+    // }
+     state.recordings.push({
+       id:action.payload.id,
+       audioFile: action.payload.audioFile 
+      });
     },
     setDropoffLocation(state, action) {
       state.dropoffLocation = action.payload;
@@ -244,6 +257,7 @@ export const {
   setLocation,
   setPickupLocation,
   setDropoffLocation,
+  setRecordings,
   Onbackground,
 } = CommonSlice.actions;
 

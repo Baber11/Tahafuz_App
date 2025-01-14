@@ -1,10 +1,11 @@
 import { Icon, Progress } from 'native-base';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { moderateScale } from 'react-native-size-matters';
 import TrackPlayer, { State, usePlaybackState, useProgress } from 'react-native-track-player';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Octicons from 'react-native-vector-icons/Octicons';
 import Color from '../Assets/Utilities/Color';
@@ -12,70 +13,144 @@ import CustomText from '../Components/CustomText';
 import Header from '../Components/Header';
 import { addTracks, setupPlayer } from '../Utillity/trackPlayerServices';
 import { windowHeight, windowWidth } from '../Utillity/utils';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import moment from 'moment';
+import { useDispatch, useSelector } from 'react-redux';
+import { setRecordings } from '../Store/slices/common';
+import { CurrentRenderContext, useIsFocused } from '@react-navigation/native';
 
+
+
+const audioRecorderPlayer = new AudioRecorderPlayer();
+// audioRecorderPlayer.setSubscriptionDuration(0.1)
 const VoiceRecordings = () => {
-    // const [isPlaying, setIsPlaying] = useState(false);
-    const [isPlayerReady, setIsPlayerReady] = useState(false);
-    const [currentTrack, setCurrentTrack] = useState(null); // Track currently playing
-    const progress = useProgress(1000); // Update every 1 second
-  
-  const {position, duration} = useProgress(1000);
-  const playing=  usePlaybackState();
-  useEffect(()=>{
-    console.log("position >= duration", format(position),format(duration) ,format(position) >= format(duration) )
-  async function  handePausePlayerOnEnd(){
+  // const [isPlaying, setIsPlaying] = useState(false);
+const dispatch = useDispatch();
+const isFocused= useIsFocused();
+const recordings = useSelector(state => state.commonReducer.recordings);
+  // console.log("🚀 ~ VoiceRecordings ~ recordings:", recordings)
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedFilePath, setRecordedFilePath] = useState(null);
+  const [currentPositionSec, setCurrentPositionSec] = useState(0); // Current playback position
+  const [durationSec, setDurationSec] = useState(0); // Total audio duration
+  const [isPlaying, setIsPlaying] = useState(false); // Audio playing state
+  const [isPause, setIsPause] = useState(false);
+  const [playTime, setPlayTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+    const [currentAudioId ,setCurrentAudioId] = useState(null); // Track currently playing
+ console.log("RUNNING AGAIN")
 
-    if(playing.state == State.Playing && progress.position >= progress.duration-1 && progress.duration > 0){
-      console.log("Hello")
-      await TrackPlayer.pause();
-      await TrackPlayer.seekTo(0);
-    } 
-  }
-  handePausePlayerOnEnd();
-  },[position, playing.state])
-    useEffect(() => {
-      console.log("Running")
-      async function setup() {
-        let isSetup = await setupPlayer();
-  
-        const queue = await TrackPlayer.getQueue();
-        if(isSetup && queue.length <= 0) {
-          await addTracks();
-        }
-  
-        setIsPlayerReady(isSetup);
+  const startRecording = async () => {
+    try {
+      const result = await audioRecorderPlayer.startRecorder();
+      console.log('Recording started:', result);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recorder:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      const result = await audioRecorderPlayer.stopRecorder();
+      console.log('Recording stopped:', result);
+      setRecordedFilePath(result);
+      setIsRecording(false);
+      const audioFileObject={
+        id: Date.now().toString(),
+        audioFile: result
       }
-  
-      setup();
-    }, []);
+      dispatch(setRecordings(audioFileObject));
+    } catch (error) {
+      console.error('Error stopping recorder:', error);
+    }
+  };
+  const playRecording = async (filePath) => {
+    try {
+      await audioRecorderPlayer.startPlayer(filePath);
+      // if(filePath != undefined){
+        audioRecorderPlayer.addPlayBackListener((e) => {
+          // console.log('Playing:', e.currentPosition);
+          setCurrentPositionSec(e.currentPosition);
+        setDurationSec(e.duration);
+        setDuration(audioRecorderPlayer.mmssss(e.duration));
+        setPlayTime(audioRecorderPlayer.mmssss(e.currentPosition));
+        if (e.currentPosition == e.duration) {
+          console.log("Running")
+          audioRecorderPlayer.stopPlayer();
+          audioRecorderPlayer.removePlayBackListener();
+          setIsPlaying(false);
+          setCurrentPositionSec(0);
+          setCurrentAudioId("");
+        }
+      });
+    // }
 
-    async function handlePlayPress(trackId, trackFile) {
-      if (currentTrack === trackId && playing.state === State.Playing) {
-        await TrackPlayer.pause();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('Error playing recording:', error);
+    }
+  };
+  
+    const handlePlayPress = (trackId, filePath) => {
+   console.log(trackId, filePath, currentAudioId, isPause, isPlaying);
+      if ((currentAudioId == trackId) && isPlaying) {
+        audioRecorderPlayer.pausePlayer();
+        // audioRecorderPlayer.
+        setIsPause(true);
+        setIsPlaying(false);
+      }
+      else if(isPause) {
+        audioRecorderPlayer.resumePlayer();
+        setIsPause(false);
+        setIsPlaying(true);
       } else {
-        if (playing.state === State.Playing || playing.state === State.Paused) {
-          await TrackPlayer.stop();
+        // Stop the current track if another one is being played
+        if (currentAudioId !== null) {
+          audioRecorderPlayer.stopPlayer();
+          setIsPlaying(false);
+          setCurrentPositionSec(0);
         }
-
-        await TrackPlayer.reset();
-        
-        await TrackPlayer.add({
-          id: trackId.toString(),
-          url: trackFile, 
-          title: `Track ${trackId}`,
-          artist: 'Artist Name',
-        });
-        await TrackPlayer.play();
-        setCurrentTrack(trackId);  
+        console.log("Running")
+        // Play the new track
+        setCurrentAudioId(trackId);
+        playRecording(filePath);
       }
-    }
-  
+    };
+    // async function handlePlayPress(trackId, trackFile) {
+    //   if (currentTrack === trackId && playing.state === State.Playing) {
+    //     await TrackPlayer.pause();
+    //   } else {
+    //     if (playing.state === State.Playing || playing.state === State.Paused) {
+    //       await TrackPlayer.stop();
+    //     }
 
-    function format(seconds) {
-      let mins = (parseInt(seconds / 60)).toString().padStart(2, '0');
-      let secs = (Math.trunc(seconds) % 60).toString().padStart(2, '0');
-      return `${mins}:${secs}`;
-    }
+    //     await TrackPlayer.reset();
+        
+    //     await TrackPlayer.add({
+    //       id: trackId.toString(),
+    //       url: trackFile, 
+    //       title: `Track ${trackId}`,
+    //       artist: 'Artist Name',
+    //     });
+    //     await TrackPlayer.play();
+    //     setCurrentTrack(trackId);  
+    //   }
+    // }
+  // useEffect(()=>{
+  //   console.log("RUNNING => ", isPlaying, isRecording, currentPositionSec)
+  //   setCurrentAudioId('');
+  //   audioRecorderPlayer.removePlayBackListener();
+
+  // },[isFocused])
+
+    
+    const formatTime = (milliseconds) => {
+      const duration = moment.duration(milliseconds);
+      const minutes = duration.minutes().toString().padStart(2, '0');
+      const seconds = duration.seconds().toString().padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    };
    
   const VoiceRecordingsArray = [
     {
@@ -108,18 +183,6 @@ const VoiceRecordings = () => {
   ];
 
 
-  const trackProgresses = VoiceRecordingsArray.reduce((acc, item) => {
-    if (currentTrack === item.id) {
-      // Update progress for the currently playing track
-      const { position, duration } = progress;
-
-      if (duration > 0) {
-        acc[item.id] = (position / duration) * 100; // Calculate percentage progress
-      }
-    }
-    return acc;
-  }, {});
-
   return (
     <>
       <Header
@@ -135,55 +198,74 @@ const VoiceRecordings = () => {
         end={{x: 0.9, y: 0.8}}
         style={styles.main}>
         <View style={styles.mainVoiceRecordings}>
-          {VoiceRecordingsArray.map((item, index) => {
-            if(!isPlayerReady){
-              return <CustomText>Loading.....</CustomText>
-            }
-            return (
-              <>
+          <FlatList
+            data={recordings}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{
+              // backgroundColor:"red",
+              paddingHorizontal:moderateScale(11,0.2),
+              alignItems:"center", justifyContent:"center"}}
+            renderItem ={({item}) =>{
+              return (
+                <>
                 <View style={styles.senderInfoContaier}>
                   <View style={styles.userView}>
                     <CustomText style={styles.letter} isBold>
-                      {item.letter}
+                      {"M"}
                     </CustomText>
                   </View>
-                  <CustomText>{item.date}</CustomText>
+                  <CustomText>{"12/02/2025"}</CustomText>
                 </View>
                 <View style={styles.ListTile}>
                   {/* <View > */}
                  <TouchableOpacity 
                  style={styles.leading}
-                  onPress={() => handlePlayPress(item.id, item.file)}
+                //  onPress={() => handlePlayPress(item.id, item.file)}
+                  onPress={() => {
+                    
+                    handlePlayPress(item.id, item.audioFile)
+                  }}
                  
                  >
 
                   <Icon
                   as={FontAwesome5}
-                  name={currentTrack === item.id && playing.state === State.Playing ? 'pause' : 'play'}
+                  name={currentAudioId === item.id && isPlaying ? 'pause' : 'play'}
                   color={'#BF55EC'}
                   size={moderateScale(14, 0.3)}
                   />
                   </TouchableOpacity>
-                  {/* </View> */}
                   <View style={styles.imageContainer}>
                  
                       <Progress 
                       style={{width:"100%", 
-                      
                       alignSelf:"center"}}
-                      colorScheme="secondary" value={
-                        // `${duration > 0 ? (position / duration) * 100 : 0}`
-                        trackProgresses[item.id] || 0
-                        } />
+                      colorScheme="secondary" value={ 
+                       currentAudioId == item.id ? 
+                        (currentPositionSec / durationSec) * 100 : 0} 
+                      />
 
-                  </View>
-                  <CustomText style={{fontSize:moderateScale(11,0.2)}}>  {currentTrack === item.id 
-          ? `${format(position)} / ${format(duration)}` 
-          : `00:00 / ${format(item.duration || 0)}`}</CustomText>
+                  </View><CustomText>{`${playTime.toString().slice(0,5)} / ${duration.toString().slice(0,5)}`}</CustomText>
+                  {/* <CustomText style={{fontSize:moderateScale(11,0.2)}}>  {currentTrack === item.id 
+          ? `${format(currentPositionSec)} / ${format(durationSec)}` 
+          : `00:00 / ${format(item.duration || 0)}`}</CustomText> */}
                 </View>
               </>
-            );
-          })}
+                );
+            }}
+              />
+        
+        
+        <TouchableOpacity style={styles.FAB} onPress={()=>{
+       isRecording ? stopRecording() : startRecording() 
+}}>
+          <Icon 
+          name={isRecording ? "stop-circle-outline" : "mic-sharp"}
+          as={Ionicons}
+          size={moderateScale(21,0.2)}
+          color={Color.white} 
+          />
+         </TouchableOpacity>
         </View>
       </LinearGradient>
     </>
@@ -204,8 +286,8 @@ const styles = StyleSheet.create({
     height: windowHeight * 0.8,
     paddingTop: moderateScale(12, 0.2),
     backgroundColor: 'rgba(255,255,255,0.35)',
-    gap: moderateScale(20, 0.2),
-    paddingHorizontal: moderateScale(20, 0.2),
+    gap: moderateScale(29, 0.2),
+    // paddingHorizontal: moderateScale(10, 0.2),
     borderRadius: moderateScale(10, 0.2),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.19)',
@@ -216,7 +298,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Color.white,
     borderRadius: moderateScale(12, 0.2),
+    alignSelf:"center",
     elevation: 5,
+    marginTop:moderateScale(10,0.2),
     gap: moderateScale(11, 0.2),
     paddingHorizontal: moderateScale(5, 0.2),
   },
@@ -236,6 +320,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: moderateScale(22, 0.2),
     alignItems: 'center',
+    marginTop:moderateScale(4,0.1),
     backgroundColor: Color.white,
     borderRadius: moderateScale(42, 0.3),
     paddingHorizontal: moderateScale(12, 0.2),
@@ -280,6 +365,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor:"#ff00001f"
 
+  },
+  FAB:{
+    width: windowWidth * 0.12,
+    height: windowWidth * 0.12,
+    borderRadius:(windowWidth * 0.12) /2,
+    backgroundColor:"#FF3974",
+    justifyContent:"center",
+    alignItems:"center",
+    elevatio:10,
+    position:"absolute",
+    right:moderateScale(12,0.2),
+    bottom:moderateScale(34,0.2)
+  
+  
   },
   gradient: {
     flex: 1,
