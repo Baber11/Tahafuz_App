@@ -41,8 +41,13 @@ const CommonSlice = createSlice({
     // }
      state.recordings.push({
        id:action.payload.id,
-       audioFile: action.payload.audioFile 
+       audioFile: action.payload.audioFile,
+       duration: action.payload.duration,
+       date:action.payload.date
       });
+    },
+    deleteAllRecordings(state, action) {
+      state.recordings=[]
     },
     setDropoffLocation(state, action) {
       state.dropoffLocation = action.payload;
@@ -259,6 +264,7 @@ export const {
   setDropoffLocation,
   setRecordings,
   Onbackground,
+  deleteAllRecordings
 } = CommonSlice.actions;
 
 export default CommonSlice.reducer;

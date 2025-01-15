@@ -47,6 +47,12 @@ const requestContactsPermission = async () =>{
       
     }
 }
+
+// const requestVoiceRecorderPermission = async () =>{
+//   try{
+//     const granted= await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.REC)
+//   }catch(err){}
+// }
 const requestCameraPermission = async () => {
   console.log("running camera Permission")
 
