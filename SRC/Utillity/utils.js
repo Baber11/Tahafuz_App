@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions, PermissionsAndroid} from 'react-native';
+import {Dimensions, PermissionsAndroid, Platform} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {setLoaction} from '../Store/slices/common';
 
@@ -75,6 +75,39 @@ const requestCameraPermission = async () => {
     console.warn(err);
   }
 };
+const requestAudoRecordPermission = async () => {
+  console.log("running Audio Permission")
+
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      {
+        title: 'Recorder Permission',
+        message:
+          'Breakaway App needs access to your Recorder ' +
+          'so you can take awesome pictures.',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can use the Camera');
+    } else {
+      console.log('Recorder permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
+const requestNotificationPermission = async () => {
+  if (Platform.OS == 'android' && Platform.Version >= 33) {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('Notification permission denied');
+    }
+  }
+};
 
 const requestWritePermission = async () => {
   try {
@@ -147,6 +180,8 @@ export {
   requestCameraPermission,
   requestWritePermission,
   requestContactsPermission,
+  requestAudoRecordPermission,
+requestNotificationPermission,
   apiHeader,
   sleep,
   wait,

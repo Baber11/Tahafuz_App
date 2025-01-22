@@ -3,12 +3,13 @@ import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   userData: {},
+  recordings:[],
+  
   categories: [],
   categoryProperties: [],
   financeBreakDown: [],
   cart: [],
   bookings: [],
-  recordings:[],
 
   notification: false,
   order: [],
@@ -20,6 +21,7 @@ const initialState = {
   pickupLocatin: {},
   dropoffLocation: {},
   background: false,
+
 };
 
 const CommonSlice = createSlice({
@@ -34,17 +36,18 @@ const CommonSlice = createSlice({
       state.pickupLocatin = action.payload;
     },
     setRecordings(state,action){
-    console.log("🚀 ~ setRecordings ~ state:", state.recordings)
-    console.log("🚀 ~ setRecordings ~ action:", action.payload)
-    // if (!Array.isArray(state.recordings)) {
-    //   state.recordings = [];
-    // }
-     state.recordings.push({
+    console.log("🚀 ~ setRecordings ~ state:", state)
+  console.log("🚀 ~ setRecordings ~ action:", state.recordings, action.payload)
+    if (!Array.isArray(state.recordings)) {
+      state.recordings=[];
+      // state.recordings = [...state.recordings, action.payload];
+    }
+if(action.payload != undefined){     state.recordings.push({
        id:action.payload.id,
        audioFile: action.payload.audioFile,
        duration: action.payload.duration,
        date:action.payload.date
-      });
+      });}
     },
     deleteAllRecordings(state, action) {
       state.recordings=[]
@@ -75,7 +78,7 @@ const CommonSlice = createSlice({
 
     AddToCart(state, action) {
       const itemId = action.payload.id;
-      console.log('🚀 ~ AddToCart ~ action.payload:', action.payload);
+      console.log('🚀 ~ AddToCart ~ action.payload:',action.payload);
       // state.cart.push({date: moment(), ...action.payload});
     },
     Onbackground(state, action) {
