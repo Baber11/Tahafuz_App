@@ -94,6 +94,26 @@ const requestWritePermission = async () => {
     console.warn(err);
   }
 };
+const audioPermission = async () => {
+  try {
+    const grant = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      {
+        title: 'Recorder Permissions',
+        message: 'This App needs to Access your Voice Recorder',
+      },
+    );
+
+    if (grant == PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('Permission granted');
+      // setAudioPermissionGranted(true)
+    } else {
+      console.log('Permission not granted');
+    }
+  } catch (error) {
+    console.log( 'this is the audio recording error ==>',error);
+  }
+};
 
 const apiHeader = (token, isFormData =true) => {
   if (token && !isFormData) {
@@ -147,6 +167,7 @@ export {
   requestCameraPermission,
   requestWritePermission,
   requestContactsPermission,
+  audioPermission,
   apiHeader,
   sleep,
   wait,

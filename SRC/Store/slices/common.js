@@ -231,7 +231,7 @@ const CommonSlice = createSlice({
     },
     setLocation(state, action) {
       state.location = action.payload;
-      console.log('🚀 ~ setLoaction ~ ==============location:', action.payload);
+      // console.log('🚀 ~ setLoaction ~ ==============location:', action.payload);
     },
   },
 });

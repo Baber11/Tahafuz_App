@@ -150,7 +150,7 @@ const Home = () => {
   //   }
   // };
   useEffect(() => {
-    console.log('Running....');
+    // console.log('Running....');
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 60000,
@@ -162,7 +162,7 @@ const Home = () => {
             lng: location.longitude,
           }),
         );
-        console.log(location);
+        // console.log(location);
       })
       .catch(error => {
         const {code, message} = error;
