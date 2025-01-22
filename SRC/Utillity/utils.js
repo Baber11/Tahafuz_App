@@ -75,58 +75,6 @@ const requestCameraPermission = async () => {
     console.warn(err);
   }
 };
-const requestAudoRecordPermission = async () => {
-  console.log("running Audio Permission")
-
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      {
-        title: 'Recorder Permission',
-        message:
-          'Breakaway App needs access to your Recorder ' +
-          'so you can take awesome pictures.',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can use the Camera');
-    } else {
-      console.log('Recorder permission denied');
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-};
-const requestNotificationPermission = async () => {
-  if (Platform.OS == 'android' && Platform.Version >= 33) {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-    );
-
-    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('Notification permission denied');
-    }
-  }
-};
-
-const requestWritePermission = async () => {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      {
-        title: 'Storage Access Required',
-        message: 'This App needs to Access your Storage',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('You can use the Storage');
-    } else {
-      console.log('Storage permission denied');
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-};
 const audioPermission = async () => {
   try {
     const grant = await PermissionsAndroid.request(
@@ -147,6 +95,39 @@ const audioPermission = async () => {
     console.log( 'this is the audio recording error ==>',error);
   }
 };
+
+const requestNotificationPermission = async () => {
+  if (Platform.OS == 'android' && Platform.Version >= 33) {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('Notification permission denied');
+    }
+  }
+};
+
+const requestWritePermission = async () => {
+
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: 'Storage Access Required',
+        message: 'This App needs to Access your Storage',
+      },
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can use the Storage');
+    } else {
+      console.log('Storage permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
+
 
 const apiHeader = (token, isFormData =true) => {
   if (token && !isFormData) {
@@ -200,6 +181,8 @@ export {
   requestCameraPermission,
   requestWritePermission,
   requestContactsPermission,
+  requestNotificationPermission,
+  audioPermission,
   apiHeader,
   sleep,
   wait,

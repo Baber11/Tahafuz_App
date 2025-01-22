@@ -113,6 +113,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation project(':react-native-contacts')
     implementation project(':react-native-audio-recorder-player')
+    implementation project(':react-native-sms')
 
 
 

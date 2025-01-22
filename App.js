@@ -7,8 +7,15 @@ import {PersistGate} from 'redux-persist/integration/react';
 import SplashScreen from './SRC/Screens/SplashScreen';
 import {persistor, store} from './SRC/Store';
 import AppNavigator from './SRC/appNavigation';
-import {Alert, AppState, DeviceEventEmitter, NativeModules, PermissionsAndroid} from 'react-native';
 import {
+  Alert,
+  AppState,
+  DeviceEventEmitter,
+  NativeModules,
+  PermissionsAndroid,
+} from 'react-native';
+import {
+  audioPermission,
   requestAudoRecordPermission,
   requestCameraPermission,
   requestContactsPermission,
@@ -20,12 +27,7 @@ import {Onbackground, setRecordings} from './SRC/Store/slices/common';
 import moment from 'moment';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
-
-
 const App = () => {
-
-
- 
   return (
     <NativeBaseProvider>
       <Provider store={store}>
@@ -39,10 +41,10 @@ const App = () => {
 const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const MainContainer = () => {
-    const [isRecording, setIsRecording] = useState(false);
-    const [recordedFilePath, setRecordedFilePath] = useState(null);
-const [recordingDuration,setRecordingDuration] = useState(0);
-    const [currentState, setCurrentState] = useState('active');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedFilePath, setRecordedFilePath] = useState(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [currentState, setCurrentState] = useState('active');
   console.log('🚀 ~ MainContainer ~ currentState:', currentState);
   const background = useSelector(state => state.commonReducer.background);
   console.log('🚀 ~ MainContainer ~ background:', background);
@@ -71,7 +73,7 @@ const [recordingDuration,setRecordingDuration] = useState(0);
 
   const options = {
     taskName: 'Recprder Running',
-    taskTitle: 'Background Action title',
+    taskTitle: 'Background Recorder',
     taskDesc: 'Recording your voice in background',
     taskIcon: {
       name: 'ic_launcher',
@@ -80,7 +82,7 @@ const [recordingDuration,setRecordingDuration] = useState(0);
     color: '#ff00ff',
     linkingURI: 'myapp',
     parameters: {
-      delay: 10000,
+      delay: 30000,
     },
   };
 
@@ -95,10 +97,10 @@ const [recordingDuration,setRecordingDuration] = useState(0);
   BackgroundService.on('expiration', () => {
     console.log('IOS : i am being closed ');
   });
- const startRecording = async () => {
+  const startRecording = async () => {
     audioRecorderPlayer.removeRecordBackListener();
     try {
-      await audioRecorderPlayer.stopRecorder()
+      await audioRecorderPlayer.stopRecorder();
       const result = await audioRecorderPlayer.startRecorder();
       console.log('Recording started:', result);
       audioRecorderPlayer.addRecordBackListener(e => {
@@ -113,6 +115,7 @@ const [recordingDuration,setRecordingDuration] = useState(0);
   };
 
   const stopRecording = async () => {
+    // console.log(recordingDuration);
     try {
       audioRecorderPlayer.removeRecordBackListener();
       const result = await audioRecorderPlayer.stopRecorder();
@@ -120,14 +123,14 @@ const [recordingDuration,setRecordingDuration] = useState(0);
       setRecordedFilePath(result);
       setIsRecording(false);
       const durationt = moment.duration(recordingDuration, 'milliseconds');
-      
-const date = new Date();
-const formattedDate = moment(date).format('DD/MM/YYYY');
+
+      const date = new Date();
+      const formattedDate = moment(date).format('DD/MM/YYYY');
       const audioFileObject = {
         id: Date.now().toString(),
         audioFile: result,
-        duration:moment.utc(durationt.asMilliseconds()).format("mm:ss"),
-        date:formattedDate
+        duration: moment.utc(durationt.asMilliseconds()).format('mm:ss'),
+        date: formattedDate,
       };
 
       dispatch(setRecordings(audioFileObject));
@@ -139,23 +142,24 @@ const formattedDate = moment(date).format('DD/MM/YYYY');
     console.log('functione me bhi agaya ha');
     const {delay} = taskData;
 
-    if (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO)) {
-     await startRecording();
-     setTimeout(() => {
-       stopRecording();
+    if (
+      await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      )
+    ) {
+      await startRecording();
+      setTimeout(() => {
+        stopRecording();
       }, 10000);
     } else {
-
-      await requestAudoRecordPermission();
+      await audioPermission();
     }
-    
+
     await new Promise(r => setTimeout(r, delay));
-
-    }
-  
+  };
 
   useEffect(() => {
-    const shakeSubscription = RNShake.addListener("shake",() => {
+    const shakeSubscription = RNShake.addListener('shake', () => {
       Alert.alert('Shake Event Detected');
       console.log('Shake Detected!');
     });
@@ -194,11 +198,10 @@ const formattedDate = moment(date).format('DD/MM/YYYY');
       'change',
       _handleAppStateChange,
     );
-    return () =>{
-     console.log("Unmount Shake!")
+    return () => {
+      console.log('Unmount Shake!');
       subscription.remove();
-    } 
-      
+    };
   }, []);
 
   useEffect(() => {
