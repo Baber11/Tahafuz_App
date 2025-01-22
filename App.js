@@ -7,14 +7,18 @@ import {PersistGate} from 'redux-persist/integration/react';
 import SplashScreen from './SRC/Screens/SplashScreen';
 import {persistor, store} from './SRC/Store';
 import AppNavigator from './SRC/appNavigation';
-import {Alert, AppState, DeviceEventEmitter, NativeModules} from 'react-native';
+import {Alert, AppState, DeviceEventEmitter, NativeModules, PermissionsAndroid} from 'react-native';
 import {
+  requestAudoRecordPermission,
   requestCameraPermission,
   requestContactsPermission,
   requestLocationPermission,
+  requestNotificationPermission,
   requestWritePermission,
 } from './SRC/Utillity/utils';
-import {Onbackground} from './SRC/Store/slices/common';
+import {Onbackground, setRecordings} from './SRC/Store/slices/common';
+import moment from 'moment';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 
 
@@ -32,27 +36,43 @@ const App = () => {
     </NativeBaseProvider>
   );
 };
+const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const MainContainer = () => {
-  const [currentState, setCurrentState] = useState('active');
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordedFilePath, setRecordedFilePath] = useState(null);
+const [recordingDuration,setRecordingDuration] = useState(0);
+    const [currentState, setCurrentState] = useState('active');
   console.log('🚀 ~ MainContainer ~ currentState:', currentState);
   const background = useSelector(state => state.commonReducer.background);
   console.log('🚀 ~ MainContainer ~ background:', background);
   const dispatch = useDispatch();
 
-  const _handleAppStateChange = nextAppState => {
+  const _handleAppStateChange = async nextAppState => {
     console.log('🚀 ~ MainContainer ~ nextAppState:', nextAppState);
+    console.log('App state changed:', nextAppState);
+
     if (nextAppState === 'active') {
-      dispatch(Onbackground(false));
-    } else
-      currentState.match(/inactive|background/) && nextAppState === 'active';
-    setCurrentState(nextAppState);
+      // Stop recording if the app is reopened
+      if (isRecording) {
+        await audioRecorderPlayer.stop();
+      }
+      // setCurrentState(nextAppState);
+    } else if (nextAppState.match(/inactive|background/)) {
+      setCurrentState(nextAppState);
+      toggleBackground();
+    }
+    // if (nextAppState === 'active') {
+    //   dispatch(Onbackground(false));
+    // } else
+    //   currentState.match(/inactive|background/) && nextAppState === 'active';
+    // setCurrentState(nextAppState);
   };
 
   const options = {
-    taskName: 'Background Action Running',
+    taskName: 'Recprder Running',
     taskTitle: 'Background Action title',
-    taskDesc: 'Background Action description',
+    taskDesc: 'Recording your voice in background',
     taskIcon: {
       name: 'ic_launcher',
       type: 'mipmap',
@@ -60,7 +80,7 @@ const MainContainer = () => {
     color: '#ff00ff',
     linkingURI: 'myapp',
     parameters: {
-      delay: 1000,
+      delay: 10000,
     },
   };
 
@@ -75,19 +95,64 @@ const MainContainer = () => {
   BackgroundService.on('expiration', () => {
     console.log('IOS : i am being closed ');
   });
+ const startRecording = async () => {
+    audioRecorderPlayer.removeRecordBackListener();
+    try {
+      await audioRecorderPlayer.stopRecorder()
+      const result = await audioRecorderPlayer.startRecorder();
+      console.log('Recording started:', result);
+      audioRecorderPlayer.addRecordBackListener(e => {
+        setRecordingDuration(e.currentPosition);
+        console.log('🚀 ~ startRecording ~ e:', e.currentPosition);
+      });
 
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recorder:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      audioRecorderPlayer.removeRecordBackListener();
+      const result = await audioRecorderPlayer.stopRecorder();
+      console.log('Recording stopped:', result);
+      setRecordedFilePath(result);
+      setIsRecording(false);
+      const durationt = moment.duration(recordingDuration, 'milliseconds');
+      
+const date = new Date();
+const formattedDate = moment(date).format('DD/MM/YYYY');
+      const audioFileObject = {
+        id: Date.now().toString(),
+        audioFile: result,
+        duration:moment.utc(durationt.asMilliseconds()).format("mm:ss"),
+        date:formattedDate
+      };
+
+      dispatch(setRecordings(audioFileObject));
+    } catch (error) {
+      console.error('Error stopping recorder:', error);
+    }
+  };
   const backgroundActions = async taskData => {
     console.log('functione me bhi agaya ha');
     const {delay} = taskData;
-    while (BackgroundService.isRunning()) {
-      try {
-        console.log('hello app is in background');
-      } catch (error) {
-        console.error('Error in tracking task:', error);
-      }
-      await new Promise(r => setTimeout(r, delay));
+
+    if (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO)) {
+     await startRecording();
+     setTimeout(() => {
+       stopRecording();
+      }, 10000);
+    } else {
+
+      await requestAudoRecordPermission();
     }
-  };
+    
+    await new Promise(r => setTimeout(r, delay));
+
+    }
+  
 
   useEffect(() => {
     const shakeSubscription = RNShake.addListener("shake",() => {
@@ -102,10 +167,10 @@ const MainContainer = () => {
 
   const toggleBackground = async () => {
     console.log('yahaa a rha ha');
-    if (!playing) {
+    if (!BackgroundService.isRunning()) {
       try {
         console.log('try me agya ha');
-        // await BackgroundService.start(backgroundActions, options);
+        await BackgroundService.start(backgroundActions, options);
         playing = true;
       } catch (error) {
         console.log(error);
@@ -117,26 +182,28 @@ const MainContainer = () => {
   };
 
   // useEffect(() => {
+
   //   if (currentState == 'background') {
   //     console.log("Toggle background!..")
-  //     // toggleBackground();
+  //     toggleBackground();
   //   }
   // }, [currentState]);
 
-  // useEffect(() => {
-  //   const subscription = AppState.addEventListener(
-  //     'change',
-  //     _handleAppStateChange,
-  //   );
-  //   return () =>{
-  //    console.log("Unmount Shake!")
-  //     subscription.remove();
-  //   } 
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      _handleAppStateChange,
+    );
+    return () =>{
+     console.log("Unmount Shake!")
+      subscription.remove();
+    } 
       
-  // }, []);
+  }, []);
 
   useEffect(() => {
     async function GetPermission() {
+      await requestNotificationPermission();
       await requestCameraPermission();
       await requestWritePermission();
       await requestContactsPermission();
