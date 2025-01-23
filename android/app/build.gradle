@@ -116,7 +116,6 @@ dependencies {
     implementation project(':react-native-sms')
 
 
-
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

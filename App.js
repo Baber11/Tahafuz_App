@@ -2,7 +2,7 @@ import {NativeBaseProvider} from 'native-base';
 import React, {useEffect, useState} from 'react';
 import BackgroundService from 'react-native-background-actions';
 import RNShake from 'react-native-shake';
-import {Provider, useDispatch, useSelector} from 'react-redux';
+import {Provider, useDispatch} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import SplashScreen from './SRC/Screens/SplashScreen';
 import {persistor, store} from './SRC/Store';
@@ -21,11 +21,13 @@ import {
   requestContactsPermission,
   requestLocationPermission,
   requestNotificationPermission,
+  requestSmsPermission,
   requestWritePermission,
 } from './SRC/Utillity/utils';
-import {Onbackground, setRecordings} from './SRC/Store/slices/common';
 import moment from 'moment';
+import mobileSms from 'react-native-mobile-sms';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import { setRecordings } from './SRC/Store/slices/common';
 
 const App = () => {
   return (
@@ -46,8 +48,7 @@ const MainContainer = () => {
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [currentState, setCurrentState] = useState('active');
   console.log('🚀 ~ MainContainer ~ currentState:', currentState);
-  const background = useSelector(state => state.commonReducer.background);
-  console.log('🚀 ~ MainContainer ~ background:', background);
+ 
   const dispatch = useDispatch();
 
   const _handleAppStateChange = async nextAppState => {
@@ -150,6 +151,17 @@ const MainContainer = () => {
       await startRecording();
       setTimeout(() => {
         stopRecording();
+        const mobileNumber = '+923292297354';
+      const message = `Kese ho?`;
+          mobileSms.sendDirectSms(mobileNumber, message)
+      .then((response) => {
+        console.log("Check you success Messages :",response);
+      })
+      .catch((error) => {
+        console.log("Check you Error Message :",error);
+      })
+      // console.log(result)
+          
       }, 10000);
     } else {
       await audioPermission();
@@ -187,11 +199,11 @@ const MainContainer = () => {
 
   // useEffect(() => {
 
-  //   if (currentState == 'background') {
+  //   // if (currentState == 'background') {
   //     console.log("Toggle background!..")
   //     toggleBackground();
-  //   }
-  // }, [currentState]);
+  //   // }
+  // }, []);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -206,6 +218,7 @@ const MainContainer = () => {
 
   useEffect(() => {
     async function GetPermission() {
+      await requestSmsPermission();
       await requestNotificationPermission();
       await requestCameraPermission();
       await requestWritePermission();
@@ -220,14 +233,7 @@ const MainContainer = () => {
   }
   // return <AppNavigator/>
   return <AppNavigator />;
-  // return <Contacts/>
-  // return <Profile/>
-  // return <Home/>
-  // return <VoiceRecordings/>
-  // return <SplashScreen />
-  // return <LoginScreen/>
-  // return <SafetyAtWork />
-  // return <Settings />
+
 };
 
 export default App;

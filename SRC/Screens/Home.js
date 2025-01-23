@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Alert, FlatList, Linking, StyleSheet, View} from 'react-native';
+import {Alert, DeviceEventEmitter, FlatList, Linking, StyleSheet, TouchableOpacity, View} from 'react-native';
 import GetLocation from 'react-native-get-location';
 import LinearGradient from 'react-native-linear-gradient';
 import {moderateScale} from 'react-native-size-matters';
@@ -19,6 +19,8 @@ import BackgroundService from 'react-native-background-actions';
 import {Icon} from 'native-base';
 import RNShake from 'react-native-shake'
 import Shake from 'react-native-shake';
+import SendSMS from 'react-native-sms'
+import mobileSms from 'react-native-mobile-sms';
 
 
 const Home = () => {
@@ -74,6 +76,10 @@ const Home = () => {
       iconType: FontAwesome6,
     },
   ];
+   
+DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
+  console.log(msg);
+});
   const data = [
     {
       id: 1,
@@ -89,6 +95,33 @@ const Home = () => {
       id: 3,
       title: 'Bus Stop',
       image: require('../Assets/Images/bus.png'), // Replace with your actual path
+    onPress : async() =>{
+      // const result =  SendIntentAndroid.sendSms("+923042157462", "HEllo Kese ho?");
+      const mobileNumber = '+923042157462';
+      const message = `Kese ho?`;
+  
+      
+      // mobileSms.sendDirectSms(mobileNumber, message)
+      // .then((response) => {
+      //   console.log("Check you success Messages :",response);
+      // })
+      // .catch((error) => {
+      //   console.log("Check you Error Message :",error);
+      // })
+      // console.log(result)
+      // SendSMS.send({
+      //   body: 'The default body of the SMS!',
+      //   recipients: ['0123456789', '03292297354'],
+      //   successTypes: ['sent', 'queued'],
+      //   allowAndroidSendWithoutReadPermission: true,
+       
+      // }, (completed, cancelled, error) => {
+    
+      //   console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
+    
+      // });
+      
+    }
     },
     {
       id: 4,
@@ -286,21 +319,24 @@ const Home = () => {
         <View style={styles.exploerView}>
           {data.map((item, index) => {
             return (
-              <View key={index} style={styles.exploreItem}>
+              <TouchableOpacity 
+              onPress={item.onPress}
+              key={index} style={styles.exploreItem}>
                 <View style={styles.exploreCard}>
                   <CustomImage
                     source={item.image}
                     onPress={() => {
-                      Linking.openURL(
-                        `geo:${location.latitude},${
-                          location.longitude
-                        }?q=${encodeURIComponent(item.title)}`,
-                      );
+                      item?.onPress()
+                      // Linking.openURL(
+                      //   `geo:${location.latitude},${
+                      //     location.longitude
+                      //   }?q=${encodeURIComponent(item.title)}`,
+                      // );
                     }}
                   />
                 </View>
                 <CustomText>{item.title}</CustomText>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>

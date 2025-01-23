@@ -75,6 +75,27 @@ const requestCameraPermission = async () => {
     console.warn(err);
   }
 };
+const requestSmsPermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.SEND_SMS,
+      {
+        title: 'SMS Permission',
+        message: 'This app needs access to send SMS.',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      }
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('SMS permission granted');
+    } else {
+      console.log('SMS permission denied');
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
 const audioPermission = async () => {
   try {
     const grant = await PermissionsAndroid.request(
@@ -182,6 +203,7 @@ export {
   requestWritePermission,
   requestContactsPermission,
   requestNotificationPermission,
+  requestSmsPermission,
   audioPermission,
   apiHeader,
   sleep,
