@@ -10,9 +10,13 @@ import AppNavigator from './SRC/appNavigation';
 import {
   Alert,
   AppState,
+  NativeEventEmitter, 
   DeviceEventEmitter,
   NativeModules,
   PermissionsAndroid,
+  
+  DevSettings, 
+  Platform
 } from 'react-native';
 import {
   audioPermission,
@@ -21,6 +25,7 @@ import {
   requestContactsPermission,
   requestLocationPermission,
   requestNotificationPermission,
+  requestSensorPermission,
   requestSmsPermission,
   requestWritePermission,
 } from './SRC/Utillity/utils';
@@ -29,6 +34,8 @@ import mobileSms from 'react-native-mobile-sms';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { setRecordings } from './SRC/Store/slices/common';
 
+const { ShakeModule } = NativeModules;
+const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
 const App = () => {
   return (
     <NativeBaseProvider>
@@ -142,44 +149,107 @@ const MainContainer = () => {
   const backgroundActions = async taskData => {
     console.log('functione me bhi agaya ha');
     const {delay} = taskData;
+// Listen for shake events
+const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
 
-    if (
-      await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      )
-    ) {
-      await startRecording();
-      setTimeout(() => {
-        stopRecording();
-        const mobileNumber = '+923292297354';
-      const message = `Kese ho?`;
-          mobileSms.sendDirectSms(mobileNumber, message)
+const shakeSubscription = shakeEventEmitter.addListener('ShakeEvent', () => {
+  console.log('Shake detected in background!');
+  Alert.alert('Shake Detected!', 'You shook the device in the background.');
+
+  // Your background logic here (e.g., start recording, send a message, etc.)
+  startRecording();
+  setTimeout(() => {
+    stopRecording();
+    const mobileNumber = '+923172112995';
+    const message = 'Kese ho?';
+    mobileSms
+      .sendDirectSms(mobileNumber, message)
       .then((response) => {
-        console.log("Check you success Messages :",response);
+        console.log('Message sent successfully:', response);
       })
       .catch((error) => {
-        console.log("Check you Error Message :",error);
-      })
-      // console.log(result)
+        console.error('Failed to send message:', error);
+      });
+  }, 10000);
+});
+
+// Keep the background task alive
+await new Promise((resolve) => setTimeout(resolve, delay));
+
+// Clean up on background task end
+return () => {
+  shakeSubscription.remove();
+  ShakeModule.stopListening();
+  console.log('Background task ended.');
+};
+
+    // if (
+    //   await PermissionsAndroid.check(
+    //     PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+    //   )
+    // ) {
+
+    //   await startRecording();
+    //   setTimeout(() => {
+    //     stopRecording();
+    //     // const mobileNumber = '+923292297354';
+    //     // const mobileNumber = '+923122032631';
+    //     const mobileNumber = '+923172112995';
+    //   const message = `Kese ho?`;
+    //       mobileSms.sendDirectSms(mobileNumber, message)
+    //   .then((response) => {
+    //     console.log("Check you success Messages :",response);
+    //   })
+    //   .catch((error) => {
+    //     console.log("Check you Error Message :",error);
+    //   })
+    //   // console.log(result)
           
-      }, 10000);
-    } else {
-      await audioPermission();
-    }
+    //   }, 10000);
+    // } else {
+    //   await audioPermission();
+    // }
 
-    await new Promise(r => setTimeout(r, delay));
+    // await new Promise(r => setTimeout(r, delay));
   };
+  // shakeEventEmitter.addListener('ShakeEvent', () => {
+  //   console.log('Device shaken!');
+  //   alert('Device shaken!');
+  // });
+  //   useEffect(() => {
+  //    requestSensorPermission();
+  //    console.log("inside  Shaken device")
+  
+  //     const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
+  // console.log(shakeEventEmitter)
+  //     // Add the shake event listener
+  //     const subscription = shakeEventEmitter.addListener('ShakeEvent', () => {
+  //      console.log("Shaken device")
+  //       Alert.alert('Shake Detected!', 'You shook the device.');
+  //     });
+  
+  //     // Start listening for shake gestures
+  //     ShakeModule.startListening();
+  
+  //     // Cleanup function to stop listening and remove the event listener
+  //     return () => {
+  //       ShakeModule.stopListening();
+  //       subscription.remove();
+  //     };
+  //   }, []);
+  // useEffect(() => {
+  //    requestSensorPermission();
 
-  useEffect(() => {
-    const shakeSubscription = RNShake.addListener('shake', () => {
-      Alert.alert('Shake Event Detected');
-      console.log('Shake Detected!');
-    });
+  //   console.log("MOUNTED SHAKE EFFECT")
+  //   const shakeSubscription = RNShake.addListener(() => {
+  //     Alert.alert('Shake Event Detected');
+  //     console.log('Shake Detected!');
+  //   });
 
-    return () => {
-      shakeSubscription.remove();
-    };
-  }, []);
+  //   return () => {
+  //     shakeSubscription.remove();
+  //   };
+  // }, []);
 
   const toggleBackground = async () => {
     console.log('yahaa a rha ha');

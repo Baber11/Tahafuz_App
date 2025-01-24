@@ -1,5 +1,5 @@
 import React from 'react';
-import {Dimensions, PermissionsAndroid, Platform} from 'react-native';
+import {Alert, Dimensions, PermissionsAndroid, Platform} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {setLoaction} from '../Store/slices/common';
 
@@ -149,7 +149,28 @@ const requestWritePermission = async () => {
   }
 };
 
+const requestSensorPermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.BODY_SENSORS,
+        {
+          title: "Sensor Access Permission",
+          message: "This app requires access to motion sensors to detect shake gestures.",
+          buttonPositive: "OK",
+        }
+      );
 
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert("Permission Granted", "You can now use shake detection.");
+      } else {
+        Alert.alert("Permission Denied", "Shake detection will not work.");
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+};
 const apiHeader = (token, isFormData =true) => {
   if (token && !isFormData) {
     return {
@@ -204,6 +225,7 @@ export {
   requestContactsPermission,
   requestNotificationPermission,
   requestSmsPermission,
+  requestSensorPermission,
   audioPermission,
   apiHeader,
   sleep,
