@@ -4,6 +4,7 @@ import {
   Alert,
   Dimensions,
   Platform,
+  Switch,
   ToastAndroid,
   TouchableOpacity,
   View,
@@ -21,6 +22,7 @@ const {height, width} = Dimensions.get('window');
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import { setBackgroundEnabled } from '../Store/slices/common';
 // import navigationService from '../navigationService';
 
 const Header = props => {
@@ -61,6 +63,7 @@ const Header = props => {
   const user = useSelector(state => state.commonReducer.userData);
   const userRole = useSelector(state => state.commonReducer.selectedRole);
   const token = useSelector(state => state.authReducer.token);
+  const backgroundEnabled = useSelector(state => state.commonReducer.background); 
   const statusArray = [
     {label: 'Change Password', value: 'ChangePassword'},
     {label: 'Terms & Conditions', value: 'TermsAndConditions'},
@@ -210,8 +213,15 @@ const Header = props => {
             height: windowHeight * 0.055,
             paddingHorizontal: backgroundEventEnabled ? moderateScale(15,0.3) :0,
           }}>
-            {backgroundEventEnabled && <Icon name={"power-off"} as={MaterialCommunityIcons}  
-            onPress={toggleBackgroundEvent}/>
+            {backgroundEventEnabled && <Switch
+          trackColor={{false: '#767577', true: '#f5ce9f'}}
+          thumbColor={backgroundEnabled ? '#f5dd4b' : '#f4f3f4'}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={()=>{
+            dispatch(setBackgroundEnabled())
+          }}
+          value={backgroundEnabled}
+        />
           }
             <Icon name={horizontalDots ? "dots-three-horizontal" :'dots-three-vertical'} as={Entypo}  
             onPress={horizontalDots ? ()=> {

@@ -7,8 +7,8 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Icon } from 'native-base';
-import React from 'react';
-import { Image, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { AppState, Image, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -40,10 +40,42 @@ const AppNavigator = () => {
 
   const RootNav = createNativeStackNavigator();
   const RootNavLogged = createNativeStackNavigator();
+  
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  useEffect(() => {
+    const handleAppStateChange =async  (nextAppState) => {
+      console.log("📢 AppState changed:", nextAppState, isBackgroundEnabled);
+  
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        console.log("✅ App is back in foreground ", BackgroundService.isRunning());
+        // BackgroundService.stop();
+        // shakeSubscription.remove();
+        // ShakeModule.stopListening();
+        console.log('Background task ended.');
+        
+      }
+  
+      if (nextAppState === 'background') {
+        // toggleBackground()
+        console.log("App is agin in background")
+      }
+  
+      appState.current = nextAppState;
+      setAppStateVisible(nextAppState);
+    };
+  
+  const subscription =  AppState.addEventListener("change", handleAppStateChange);
+  
+    return () => {
+      console.log("🛑 Cleaning up AppState listener...");
+      subscription.remove()
+    };
+  }, []);
+
 
   const AppNavigatorContainer = () => {
     const firstScreen = token ? 'TabNavigation' : 'LoginScreen';
-
     return (
       <NavigationContainer ref={navigationService.navigationRef}>
         <RootNav.Navigator

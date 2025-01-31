@@ -118,7 +118,7 @@ const audioPermission = async () => {
 };
 
 const requestNotificationPermission = async () => {
-  if (Platform.OS == 'android' && Platform.Version >= 33) {
+  try{if (Platform.OS == 'android' && Platform.Version >= 33) {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
@@ -126,6 +126,13 @@ const requestNotificationPermission = async () => {
     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
       console.log('Notification permission denied');
     }
+    else{
+      console.log('Now you can recieve notifications..');
+
+    }
+  }
+  }catch(err){
+    console.log("Error while request for notifications Permissions.", err)
   }
 };
 

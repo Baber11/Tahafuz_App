@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {Alert, DeviceEventEmitter, FlatList, Linking, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {Alert, AppState, DeviceEventEmitter, FlatList, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, StyleSheet, TouchableOpacity, View} from 'react-native';
 import GetLocation from 'react-native-get-location';
 import LinearGradient from 'react-native-linear-gradient';
 import {moderateScale} from 'react-native-size-matters';
@@ -13,18 +13,24 @@ import CustomButton from '../Components/CustomButton';
 import CustomImage from '../Components/CustomImage';
 import CustomText from '../Components/CustomText';
 import Header from '../Components/Header';
-import {Onbackground, setLocation} from '../Store/slices/common';
-import {windowHeight, windowWidth} from '../Utillity/utils';
+import {Onbackground, setLocation, setRecordings} from '../Store/slices/common';
+import {audioPermission, windowHeight, windowWidth} from '../Utillity/utils';
 import BackgroundService from 'react-native-background-actions';
 import {Icon} from 'native-base';
 import RNShake from 'react-native-shake'
 import Shake from 'react-native-shake';
 import SendSMS from 'react-native-sms'
 import mobileSms from 'react-native-mobile-sms';
+import RNFetchBlob from 'rn-fetch-blob';
+import moment from 'moment';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+const {ShakeModule} = NativeModules;
 
+const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const Home = () => {
   const location = useSelector(state => state.commonReducer.location);
+  const appIsInBackground = useSelector(state => state.commonReducer.background);
   const dispatch = useDispatch();
   const emergencyCardData = [
     {
@@ -76,10 +82,12 @@ const Home = () => {
       iconType: FontAwesome6,
     },
   ];
-   
-DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
-  console.log(msg);
-});
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedFilePath, setRecordedFilePath] = useState(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [value, setValue] = useState(0);
   const data = [
     {
       id: 1,
@@ -95,33 +103,33 @@ DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
       id: 3,
       title: 'Bus Stop',
       image: require('../Assets/Images/bus.png'), // Replace with your actual path
-    onPress : async() =>{
-      // const result =  SendIntentAndroid.sendSms("+923042157462", "HEllo Kese ho?");
-      const mobileNumber = '+923042157462';
-      const message = `Kese ho?`;
+    // onPress : async() =>{
+    //   // const result =  SendIntentAndroid.sendSms("+923042157462", "HEllo Kese ho?");
+    //   const mobileNumber = '+923042157462';
+    //   const message = `Kese ho?`;
   
       
-      // mobileSms.sendDirectSms(mobileNumber, message)
-      // .then((response) => {
-      //   console.log("Check you success Messages :",response);
-      // })
-      // .catch((error) => {
-      //   console.log("Check you Error Message :",error);
-      // })
-      // console.log(result)
-      // SendSMS.send({
-      //   body: 'The default body of the SMS!',
-      //   recipients: ['0123456789', '03292297354'],
-      //   successTypes: ['sent', 'queued'],
-      //   allowAndroidSendWithoutReadPermission: true,
+    //   // mobileSms.sendDirectSms(mobileNumber, message)
+    //   // .then((response) => {
+    //   //   console.log("Check you success Messages :",response);
+    //   // })
+    //   // .catch((error) => {
+    //   //   console.log("Check you Error Message :",error);
+    //   // })
+    //   // console.log(result)
+    //   // SendSMS.send({
+    //   //   body: 'The default body of the SMS!',
+    //   //   recipients: ['0123456789', '03292297354'],
+    //   //   successTypes: ['sent', 'queued'],
+    //   //   allowAndroidSendWithoutReadPermission: true,
        
-      // }, (completed, cancelled, error) => {
+    //   // }, (completed, cancelled, error) => {
     
-      //   console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
+    //   //   console.log('SMS Callback: completed: ' + completed + ' cancelled: ' + cancelled + 'error: ' + error);
     
-      // });
+    //   // });
       
-    }
+    // }
     },
     {
       id: 4,
@@ -129,59 +137,183 @@ DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
       image: require('../Assets/Images/police.png'), // Replace with your actual path
     },
   ];
+  const startRecording = async () => {
+    let i=0;
+    console.log("Startrecorder === > ", ++i)
+    audioRecorderPlayer.removeRecordBackListener();
+    try {
+      await audioRecorderPlayer.stopRecorder();
+      const result = await audioRecorderPlayer.startRecorder();
+      BackgroundService.updateNotification({
+        progressBar :{
+          max : 30,
+          value: value,
+          indeterminate: true
+        },
+        taskDesc:"Recording Started...."})
+      console.log('Recording started:', result);
+      audioRecorderPlayer.addRecordBackListener(e => {
+        setRecordingDuration(e.currentPosition);
+        setValue((prevState) => ++prevState)
+        console.log('🚀 ~ startRecording ~ e:', e.currentPosition);
+      });
+
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recorder:', error);
+    }
+  };
+
+  const stopRecording = async () => {
+    // console.log(recordingDuration);
+    let i=0;
+    console.log("Stop recorder === > ", ++i)
+    try {
+      audioRecorderPlayer.removeRecordBackListener();
+      const result = await audioRecorderPlayer.stopRecorder();
+      const audioData = await RNFetchBlob.fs.readFile(result, 'base64');
+      console.log("🚀 ~ stopRecording ~ audioData:", audioData)
+      RNFetchBlob.fs.stat(result).then((stats) => {
+        console.log("Recorded file size:", stats.size);
+      });
+      BackgroundService.updateNotification({
+        progressBar: null,
+        taskDesc:"Recording Stopped...."})
+
+      console.log('Recording stopped:', result);
+      setValue(0);
+      setRecordedFilePath(result);
+      setIsRecording(false);
+      const durationt = moment.duration(recordingDuration, 'milliseconds');
+
+      const date = new Date();
+      const formattedDate = moment(date).format('DD/MM/YYYY');
+      const audioFileObject = {
+        id: Date.now().toString(),
+        audioFile: result,
+        duration: moment.utc(durationt.asMilliseconds()).format('mm:ss'),
+        date: formattedDate,
+      };
+
+      dispatch(setRecordings(audioFileObject));
+    } catch (error) {
+      console.error('Error stopping recorder:', error);
+    }
+  };
+  
+  const backgroundActions = async (taskData) =>{
+    let i =0;
+    const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
+              
+    const shakeSubscription = shakeEventEmitter.addListener(
+      'ShakeEvent',
+     async () => {
+      console.log('Shake detected in background!', ++i);
+
+    // const mobileNumber = '+923122032631';
+      const mobileNumber = '+923110287289';
+              // const mobileNumber = '+923172112995';
+              // const message = 'Shadi mai kitne din reh gye hen?';
+              const message = 'STest Message!';
+      mobileSms
+        .sendDirectSms(mobileNumber, message)
+        .then(response => {
+          console.log('Message sent successfully:', response);
+        })
+        .catch(error => {
+          console.error('Failed to send message:', error);
+        });
+      
+      //       await startRecording();
+      // setTimeout(() => {
+      //   stopRecording();
+      // }, 5000);
+      if (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO)) {
+       await startRecording();
+        setTimeout(() => {
+          stopRecording();
+        }, 60000);
+      } else {
+
+        await audioPermission();
+      }
+     
+       
+      },
+      shakeEventEmitter.removeAllListeners("ShakeEvent")
+  // shakeSubscription.remove();
+    );
+    return new Promise(resolve => {})
+  }
  
-  useEffect(() => {
-    const shakeSubscription = RNShake.addListener(() => {
-      Alert.alert('Shake Event Detected', 'You just shook the device!');
-      console.log('Shake Detected!');
-    });
-    return () => {
-      shakeSubscription.remove();
-    };
-    // const subscription =   Accelerometer({
-    //   updateInterval: 100, // Update interval in milliseconds
-    // }).subscribe(({ x, y, z }) => {
-    //     const magnitude = Math.sqrt(x * x + y * y + z * z);
-    //     if (magnitude > 2.5) { // Adjust threshold based on sensitivity
-    //       Alert.alert('Shake detected!', 'Device shake magnitude exceeded threshold!');
-    //     }
-    //   });
-
-    // return () => subscription.unsubscribe(); // Cleanup
-  }, []);
-  // const options = {
-  //   taskName: 'Background Action Running',
-  //   taskTitle: 'Background Action title',
-  //   taskDesc: 'Background Action description',
-  //   taskIcon: {
-  //     name: 'ic_launcher',
-  //     type: 'mipmap',
-  //   },
-  //   color: '#ff00ff',
-  //   // linkingURI: 'yourSchemeHere://chat/jane',
-  //   parameters: {
-  //     delay: 1000,
-  //   },
-  // };
-
-  // let playing = BackgroundService.isRunning();
-
-  // const toggleBackground = async () => {
-  //   if (!playing) {
-  //     try {
-  //       await BackgroundService.start(
-  //         console.log('app is in background'),
-  //         options,
-  //       );
-  //       playing = true;
-  //     } catch (error) {
-  //       console.log(error);
+  const options = {
+    taskName: 'Background Action Running',
+    taskTitle: 'Background Action title',
+    taskDesc: 'Background Action description',
+    taskIcon: {
+      name: 'ic_launcher',
+      type: 'mipmap',
+    },
+    color: '#ff00ff',
+    parameters: {
+      delay: 1000,
+    },
+  };
+  // useEffect(() => {
+  //   const handleAppStateChange =async  (nextAppState) => {
+  //     console.log("📢 AppState changed:", nextAppState, isBackgroundEnabled);
+  
+  //     if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+  //       console.log("✅ App is back in foreground ", BackgroundService.isRunning());
+  //       BackgroundService.stop();
+  //       // shakeSubscription.remove();
+  //       ShakeModule.stopListening();
+  //       console.log('Background task ended.');
+  //       if (isRecording) {
+  //         await audioRecorderPlayer.stop();
+  //       }
   //     }
-  //   } else {
-  //     await BackgroundService.stop();
-  //     playing = false;
-  //   }
-  // };
+  
+  //     if (nextAppState === 'background') {
+  //       toggleBackground()
+  //     }
+  
+  //     appState.current = nextAppState;
+  //     setAppStateVisible(nextAppState);
+  //   };
+  
+  // const subscription =  AppState.addEventListener("change", handleAppStateChange);
+  
+  //   return () => {
+  //     console.log("🛑 Cleaning up AppState listener...");
+  //     subscription.remove()
+  //   };
+  // }, []);
+  const toggleBackground = async () => {
+    if (!BackgroundService.isRunning()) {
+      try {
+        
+        await BackgroundService.start(backgroundActions, options);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      
+      await BackgroundService.stop();
+      console.log('✅ background Actions has been stopped.');         
+    }
+  };
+ 
+
+  useEffect(()=>{
+    if(appIsInBackground){
+      // console.log("BG ACTIONS Should be run......")
+      toggleBackground()
+    }else{
+      BackgroundService.stop() 
+    }
+  },[appIsInBackground])
+
   useEffect(() => {
     // console.log('Running....');
     GetLocation.getCurrentPosition({
@@ -218,8 +350,7 @@ DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
         horizontalDots={true}
         backgroundEventEnabled
         toggleBackgroundEvent={() => {
-          // toggleBackground();
-          dispatch(Onbackground(true));
+          toggleBackground();
         }}
       />
       <LinearGradient
@@ -294,6 +425,10 @@ DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
                       textColor={'#FC4A1ACC'}
                       onPress={() => {
                         const url = `tel:${item.contact}`;
+                        console.log("TRIGGERING SHAKE")
+                        // dispatch(Onbackground(true));
+                     
+                      
                         Linking.openURL(url).catch(err =>
                           console.error('Failed to open dial pad:', err),
                         );
@@ -320,18 +455,18 @@ DeviceEventEmitter.addListener('sms_onDelivery', (msg) => {
           {data.map((item, index) => {
             return (
               <TouchableOpacity 
-              onPress={item.onPress}
+              // onPress={item.onPress}
               key={index} style={styles.exploreItem}>
                 <View style={styles.exploreCard}>
                   <CustomImage
                     source={item.image}
                     onPress={() => {
-                      item?.onPress()
-                      // Linking.openURL(
-                      //   `geo:${location.latitude},${
-                      //     location.longitude
-                      //   }?q=${encodeURIComponent(item.title)}`,
-                      // );
+                      // item?.onPress()
+                      Linking.openURL(
+                        `geo:${location.latitude},${
+                          location.longitude
+                        }?q=${encodeURIComponent(item.title)}`,
+                      );
                     }}
                   />
                 </View>

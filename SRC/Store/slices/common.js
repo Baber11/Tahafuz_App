@@ -81,7 +81,7 @@ if(action.payload != undefined){     state.recordings.push({
       console.log('🚀 ~ AddToCart ~ action.payload:',action.payload);
       // state.cart.push({date: moment(), ...action.payload});
     },
-    Onbackground(state, action) {
+    setBackgroundEnabled(state, action) {
       state.background = action.payload;
     },
     RemoveToCart(state, action) {
@@ -266,7 +266,7 @@ export const {
   setPickupLocation,
   setDropoffLocation,
   setRecordings,
-  Onbackground,
+  setBackgroundEnabled,
   deleteAllRecordings
 } = CommonSlice.actions;
 

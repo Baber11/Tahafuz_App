@@ -91,8 +91,10 @@ const formattedDate = moment(date).format('DD/MM/YYYY');
     }
   };
   const playRecording = async filePath => {
+    console.log("🚀 ~ VoiceRecordings ~ filePath:", filePath)
     try {
       console.log('Start Recording Function RUNS..');
+      
       await audioRecorderPlayer.stopPlayer();
       audioRecorderPlayer.removePlayBackListener();
 

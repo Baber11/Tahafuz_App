@@ -32,7 +32,7 @@ import {
 import moment from 'moment';
 import mobileSms from 'react-native-mobile-sms';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import { setRecordings } from './SRC/Store/slices/common';
+import { setBackgroundEnabled, setRecordings } from './SRC/Store/slices/common';
 
 const { ShakeModule } = NativeModules;
 const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
@@ -63,6 +63,7 @@ const MainContainer = () => {
     console.log('App state changed:', nextAppState);
 
     if (nextAppState === 'active') {
+      dispatch(setBackgroundEnabled(false))
       // Stop recording if the app is reopened
       if (isRecording) {
         await audioRecorderPlayer.stop();
@@ -70,7 +71,8 @@ const MainContainer = () => {
       // setCurrentState(nextAppState);
     } else if (nextAppState.match(/inactive|background/)) {
       setCurrentState(nextAppState);
-      toggleBackground();
+      // toggleBackground();
+      dispatch(setBackgroundEnabled(true))
     }
     // if (nextAppState === 'active') {
     //   dispatch(Onbackground(false));
@@ -151,30 +153,30 @@ const MainContainer = () => {
     const {delay} = taskData;
 // Listen for shake events
 const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
-
+let i =0;
 const shakeSubscription = shakeEventEmitter.addListener('ShakeEvent', () => {
   console.log('Shake detected in background!');
-  Alert.alert('Shake Detected!', 'You shook the device in the background.');
-
+  // Alert.alert('Shake Detected!', 'You shook the device in the background.');
+console.log("first", i++)
   // Your background logic here (e.g., start recording, send a message, etc.)
-  startRecording();
-  setTimeout(() => {
-    stopRecording();
-    const mobileNumber = '+923172112995';
-    const message = 'Kese ho?';
-    mobileSms
-      .sendDirectSms(mobileNumber, message)
-      .then((response) => {
-        console.log('Message sent successfully:', response);
-      })
-      .catch((error) => {
-        console.error('Failed to send message:', error);
-      });
-  }, 10000);
+  // startRecording();
+  // setTimeout(() => {
+  //   stopRecording();
+  //   const mobileNumber = '+923172112995';
+  //   const message = 'Kese ho?';
+  //   mobileSms
+  //     .sendDirectSms(mobileNumber, message)
+  //     .then((response) => {
+  //       console.log('Message sent successfully:', response);
+  //     })
+  //     .catch((error) => {
+  //       console.error('Failed to send message:', error);
+  //     });
+  // }, 10000);
 });
 
 // Keep the background task alive
-await new Promise((resolve) => setTimeout(resolve, delay));
+await new Promise(()=>{});
 
 // Clean up on background task end
 return () => {
