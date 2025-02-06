@@ -28,7 +28,8 @@ import { setBackgroundEnabled } from '../Store/slices/common';
 const Header = props => {
   const dispatch = useDispatch();
   const notification = useSelector(state => state.commonReducer.notification);
-  const cartData = useSelector(state => state.commonReducer.cart);
+  // const cartData = useSelector(state => state.commonReducer.cart);
+  const contacts = useSelector(state => state.commonReducer.contacts);
   // const navigationN = useNavigation();
   const navigation = useNavigation();
 
@@ -63,7 +64,7 @@ const Header = props => {
   const user = useSelector(state => state.commonReducer.userData);
   const userRole = useSelector(state => state.commonReducer.selectedRole);
   const token = useSelector(state => state.authReducer.token);
-  const backgroundEnabled = useSelector(state => state.commonReducer.background); 
+  const backgroundEnabled = useSelector(state => state.commonReducer.backgroundEnabled); 
   const statusArray = [
     {label: 'Change Password', value: 'ChangePassword'},
     {label: 'Terms & Conditions', value: 'TermsAndConditions'},
@@ -218,6 +219,9 @@ const Header = props => {
           thumbColor={backgroundEnabled ? '#f5dd4b' : '#f4f3f4'}
           ios_backgroundColor="#3e3e3e"
           onValueChange={()=>{
+            if(contacts?.length == 0){
+              return Alert.alert("No contacts found.", "Please add some contacts to app.")
+            }
             dispatch(setBackgroundEnabled())
           }}
           value={backgroundEnabled}

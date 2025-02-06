@@ -14,14 +14,16 @@ import Header from '../Components/Header'
 import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils'
 import CustomImage from '../Components/CustomImage'
 import { Get } from '../Axios/AxiosInterceptorFunction'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { setCOntacts } from '../Store/slices/common'
 
 
 const ContactsScreen = () => {
   const isFocused = useIsFocused();
+  const dispatch = useDispatch();
   const token = useSelector(state => state.authReducer.token);
-  const [contacts, setContacts] = useState([]);
-  console.log("🚀 ~ ContactsScreen ~ contacts:", JSON.stringify(contacts,null,2))
+  const [contactsData, setContactsData] = useState([]);
+  // console.log("🚀 ~ ContactsScreen ~ contacts:", JSON.stringify(contacts,null,2))
   const [fetchedContacts , setFetchedContacts] = useState([]);
   const [modalIsVisible, setModalIsVisible] = useState(false)
   const [isLoading, setIsLoading ] = useState(false);
@@ -41,7 +43,8 @@ const getContacts = async () =>{
   const response = await Get(url, token);
   setIsLoading(false);
   if(response != undefined){
-    setContacts(response?.data?.contacts_list);  
+    setContactsData(response?.data?.contacts_list);
+    dispatch(setCOntacts(response?.data?.contacts_list));  
   }
     console.log("🚀 ~ getContacts ~ response?.data?.contacts_list:", response?.data?.contacts_list)
 }
@@ -59,9 +62,10 @@ useEffect(()=>{
     })))
     console.log(JSON.stringify(fetchedContacts,null,2));
   }
+  console.log("RUNNING CONTACTS EFFECT FUNC()")
   getContactsFromPhone();
   getContacts();
-},[isFocused])
+},[isFocused,modalIsVisible])
 
 
 
@@ -81,7 +85,7 @@ useEffect(()=>{
     end={{x: 0.9, y:0.8 }}
     style={styles.main}
     >
-        <View style={[styles.mainSettings, (contacts?.length == 0 || isLoading)  && {
+        <View style={[styles.mainSettings, (contactsData?.length == 0 || isLoading)  && {
           justifyContent:"center",
           alignItems:"center"
         }]}>
@@ -89,7 +93,7 @@ useEffect(()=>{
           <ActivityIndicator color="#FF3974CC" size={"large"}/> 
           : <FlatList 
           keyExtractor={item => item.id}
-          data={contacts}
+          data={contactsData}
           ListEmptyComponent={()=>{
            return (
              <View style={{width: "100%", 
@@ -157,9 +161,9 @@ useEffect(()=>{
     <ContactsModal
     modalIsVisible={modalIsVisible}
     setModalIsVisible={setModalIsVisible}
-    data={fetchedContacts?.filter(item => !contacts.some( c => c.id === item?.id))}
-    contacts={contacts}
-    setContacts={setContacts}
+    data={fetchedContacts?.filter(item => !contactsData.some( c => c.id === item?.id))}
+    contacts={contactsData}
+    setContacts={setContactsData}
     />
     </>
   )

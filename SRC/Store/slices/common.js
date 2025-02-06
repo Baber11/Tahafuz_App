@@ -20,8 +20,9 @@ const initialState = {
   location: {},
   pickupLocatin: {},
   dropoffLocation: {},
-  background: false,
-
+  appIsInbackground: false,
+  backgroundEnabled: false,
+  contacts:[]
 };
 
 const CommonSlice = createSlice({
@@ -81,8 +82,14 @@ if(action.payload != undefined){     state.recordings.push({
       console.log('🚀 ~ AddToCart ~ action.payload:',action.payload);
       // state.cart.push({date: moment(), ...action.payload});
     },
+    setAppIsInBackground(state, action) {
+      state.appIsInbackground = action.payload;
+    },
     setBackgroundEnabled(state, action) {
-      state.background = action.payload;
+      state.backgroundEnabled = !state.backgroundEnabled;
+    },
+    setCOntacts(state, action){
+      state.contacts = action.payload
     },
     RemoveToCart(state, action) {
       const itemId = action.payload.id;
@@ -267,6 +274,8 @@ export const {
   setDropoffLocation,
   setRecordings,
   setBackgroundEnabled,
+  setAppIsInBackground,
+  setCOntacts,
   deleteAllRecordings
 } = CommonSlice.actions;
 

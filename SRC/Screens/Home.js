@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {Alert, AppState, DeviceEventEmitter, FlatList, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Alert, AppState, DeviceEventEmitter, FlatList, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, StyleSheet, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import GetLocation from 'react-native-get-location';
 import LinearGradient from 'react-native-linear-gradient';
 import {moderateScale} from 'react-native-size-matters';
@@ -8,13 +8,15 @@ import Feather from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
+
 // import Feather from "react-native-vector-icons/Feather";
 import CustomButton from '../Components/CustomButton';
 import CustomImage from '../Components/CustomImage';
 import CustomText from '../Components/CustomText';
 import Header from '../Components/Header';
 import {Onbackground, setLocation, setRecordings} from '../Store/slices/common';
-import {audioPermission, windowHeight, windowWidth} from '../Utillity/utils';
+import {audioPermission, requestLocationPermission, requestWritePermission, windowHeight, windowWidth} from '../Utillity/utils';
 import BackgroundService from 'react-native-background-actions';
 import {Icon} from 'native-base';
 import RNShake from 'react-native-shake'
@@ -24,13 +26,18 @@ import mobileSms from 'react-native-mobile-sms';
 import RNFetchBlob from 'rn-fetch-blob';
 import moment from 'moment';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import { useIsFocused } from '@react-navigation/native';
 const {ShakeModule} = NativeModules;
 
 const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const Home = () => {
   const location = useSelector(state => state.commonReducer.location);
-  const appIsInBackground = useSelector(state => state.commonReducer.background);
+  console.log("🚀 ~ Home ~ location:", location)
+  const appIsInBackground = useSelector(state => state.commonReducer.appIsInbackground);
+  const backgroundEnabled = useSelector(state => state.commonReducer.backgroundEnabled);
+  const contacts = useSelector(state => state.commonReducer.contacts);
+  const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const emergencyCardData = [
     {
@@ -214,16 +221,19 @@ const Home = () => {
       const mobileNumber = '+923110287289';
               // const mobileNumber = '+923172112995';
               // const message = 'Shadi mai kitne din reh gye hen?';
-              const message = 'STest Message!';
-      mobileSms
-        .sendDirectSms(mobileNumber, message)
-        .then(response => {
-          console.log('Message sent successfully:', response);
-        })
-        .catch(error => {
-          console.error('Failed to send message:', error);
-        });
-      
+              for (let contact of contacts){
+
+                const message = `Help Me!  https://www.google.com/maps?q=${location.lat},${location.lng}`;
+        mobileSms
+          .sendDirectSms(contact.number, message)
+          .then(response => {
+            console.log('Message sent successfully:', response);
+          })
+          .catch(error => {
+            console.error('Failed to send message:', error);
+          });
+        
+              }
       //       await startRecording();
       // setTimeout(() => {
       //   stopRecording();
@@ -232,7 +242,7 @@ const Home = () => {
        await startRecording();
         setTimeout(() => {
           stopRecording();
-        }, 60000);
+        }, 6000);
       } else {
 
         await audioPermission();
@@ -306,34 +316,102 @@ const Home = () => {
  
 
   useEffect(()=>{
-    if(appIsInBackground){
-      // console.log("BG ACTIONS Should be run......")
+    if(backgroundEnabled){
+      console.log("BG ACTIONS Should be run......" , backgroundEnabled);
       toggleBackground()
     }else{
       BackgroundService.stop() 
     }
-  },[appIsInBackground])
+  },[backgroundEnabled])
+
+  GetLocation.getCurrentPosition({
+    enableHighAccuracy: true,
+    timeout: 60000,
+  })
+    .then(location => {
+      console.log(location)
+      dispatch(
+        setLocation({
+          lat: location.latitude,
+          lng: location.longitude,
+        }),
+      );
+      // console.log(location);
+    })
+    .catch(error => {
+      const {code, message} = error;
+      console.warn(code, message);
+    });
+
+const getLocation = async () =>{
+  console.log("RUNNING GET LOCATION")
+      // requestWritePermission();
+      const url = 'locationstore';
+      const permissionResult = await requestLocationPermission();
+      console.log('result == >', permissionResult);
+          // : await requestLocationPermissionIOS();
+  
+      if (permissionResult == false) {
+        return Platform.OS == 'android'
+          ? ToastAndroid.show(
+              'Location Permission denied by user',
+              ToastAndroid.SHORT,
+            )
+          : Alert.alert(
+              'Location blocked',
+              'Location is blocked as denied by user , enable in settings and try again',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+                {text: 'Settings', onPress: () => Linking.openSettings()},
+              ],
+            );
+      }
+      // console.log('Running....');
+      GetLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 60000,
+      })
+        .then(location => {
+          console.log(location)
+          dispatch(
+            setLocation({
+              lat: location.latitude,
+              lng: location.longitude,
+            }),
+          );
+          // console.log(location);
+        })
+        .catch(error => {
+          const {code, message} = error;
+          console.warn(code, message);
+        });
+}
+// const handleEnableLocation = () => {
+//   RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+//     interval: 10000,
+//     fastInterval: 5000,
+//   })
+//     .then(data => {
+//       // setIsLoading(true);
+//       getLocation();
+//       // fetchAddress();
+//     })
+//     .catch(err => {
+//       // setIsLoading(false);
+//       console.log(err);
+//     });
+// };
 
   useEffect(() => {
-    // console.log('Running....');
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 60000,
-    })
-      .then(location => {
-        dispatch(
-          setLocation({
-            lat: location.latitude,
-            lng: location.longitude,
-          }),
-        );
-        // console.log(location);
-      })
-      .catch(error => {
-        const {code, message} = error;
-        console.warn(code, message);
-      });
-  }, []);
+    console.log("RENDERS HOME")
+    requestLocationPermission()
+    getLocation()
+    // handleEnableLocation();
+  }, [isFocused]);
 
   return (
     <>
@@ -350,7 +428,7 @@ const Home = () => {
         horizontalDots={true}
         backgroundEventEnabled
         toggleBackgroundEvent={() => {
-          toggleBackground();
+          // toggleBackground();
         }}
       />
       <LinearGradient

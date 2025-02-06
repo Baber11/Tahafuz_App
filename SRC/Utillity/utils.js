@@ -18,14 +18,18 @@ const requestLocationPermission = async () => {
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       // console.log("🚀 ~ requestLocationPermission ~ granted:", granted)
-      dispatch(setLoaction(granted));
+      // dispatch(setLoaction(granted));
+      return true;
       console.log('You can use the Location');
     } else {
+      
+      return false;
       console.log('Location permission denied');
     }
   } catch (err) {
     console.warn(err);
   }
+  
 };
 const requestContactsPermission = async () =>{
   console.log("running contacts Permission")

@@ -16,7 +16,9 @@ import {
   PermissionsAndroid,
   
   DevSettings, 
-  Platform
+  Platform,
+  Linking,
+  ToastAndroid
 } from 'react-native';
 import {
   audioPermission,
@@ -32,7 +34,7 @@ import {
 import moment from 'moment';
 import mobileSms from 'react-native-mobile-sms';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import { setBackgroundEnabled, setRecordings } from './SRC/Store/slices/common';
+import { setAppIsInBackground, setBackgroundEnabled, setLocation, setRecordings } from './SRC/Store/slices/common';
 
 const { ShakeModule } = NativeModules;
 const shakeEventEmitter = new NativeEventEmitter(ShakeModule);
@@ -63,7 +65,7 @@ const MainContainer = () => {
     console.log('App state changed:', nextAppState);
 
     if (nextAppState === 'active') {
-      dispatch(setBackgroundEnabled(false))
+      dispatch(setAppIsInBackground(false))
       // Stop recording if the app is reopened
       if (isRecording) {
         await audioRecorderPlayer.stop();
@@ -72,7 +74,7 @@ const MainContainer = () => {
     } else if (nextAppState.match(/inactive|background/)) {
       setCurrentState(nextAppState);
       // toggleBackground();
-      dispatch(setBackgroundEnabled(true))
+      dispatch(setAppIsInBackground(true))
     }
     // if (nextAppState === 'active') {
     //   dispatch(Onbackground(false));
@@ -276,7 +278,56 @@ return () => {
   //     toggleBackground();
   //   // }
   // }, []);
-
+  const getLocation = async () =>{
+    console.log("RUNNING GET LOCATION")
+        // requestWritePermission();
+        const url = 'locationstore';
+        const permissionResult = await requestLocationPermission();
+        console.log('result == >', permissionResult);
+            // : await requestLocationPermissionIOS();
+    
+        if (permissionResult == false) {
+          return Platform.OS == 'android'
+            ? ToastAndroid.show(
+                'Location Permission denied by user',
+                ToastAndroid.SHORT,
+              )
+            : Alert.alert(
+                'Location blocked',
+                'Location is blocked as denied by user , enable in settings and try again',
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                  },
+                  {text: 'Settings', onPress: () => Linking.openSettings()},
+                ],
+              );
+        }
+        // console.log('Running....');
+        GetLocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 60000,
+        })
+          .then(location => {
+            console.log(location)
+            dispatch(
+              setLocation({
+                lat: location.latitude,
+                lng: location.longitude,
+              }),
+            );
+            // console.log(location);
+          })
+          .catch(error => {
+            const {code, message} = error;
+            console.warn(code, message);
+          });
+  }
+useEffect(() =>{
+  getLocation()
+},[]);
   useEffect(() => {
     const subscription = AppState.addEventListener(
       'change',
@@ -290,6 +341,7 @@ return () => {
 
   useEffect(() => {
     async function GetPermission() {
+      await audioPermission();
       await requestSmsPermission();
       await requestNotificationPermission();
       await requestCameraPermission();
