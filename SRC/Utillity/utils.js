@@ -182,6 +182,38 @@ const requestSensorPermission = async () => {
     }
   }
 };
+
+const requestForegroundPermissions = async () => {
+  console.log("Entered in the foregroundSerivceRequest == >  ")
+  if (Platform.OS === 'android' && Platform.Version >= 34) {
+    try {
+  console.log("Entered in the foregroundSerivceRequest == >  ", Platform.OS, Platform.Version);
+  
+  const granted = await PermissionsAndroid.requestMultiple([
+    PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE,
+    PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE_MEDIA_PROJECTION,
+    PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE_MICROPHONE,
+  ]);
+  console.log("🚀 ~ requestForegroundPermissions ~ granted:", granted)
+  console.log("Entered in the foregroundSerivceRequest == > granted ", granted)
+
+      if (
+        granted[PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE] === PermissionsAndroid.RESULTS.GRANTED &&
+        granted[PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE_MEDIA_PROJECTION] === PermissionsAndroid.RESULTS.GRANTED &&
+        granted[PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE_MICROPHONE] === PermissionsAndroid.RESULTS.GRANTED
+      ) {
+        console.log('Foreground Service permissions granted');
+        return true;
+      } else {
+        console.log('Foreground Service permissions denied');
+        return false;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+};
+
 const apiHeader = (token, isFormData =true) => {
   if (token && !isFormData) {
     return {
@@ -240,6 +272,7 @@ export {
   audioPermission,
   apiHeader,
   sleep,
+  requestForegroundPermissions,
   wait,
   ContainsHTML,
   windowWidth,

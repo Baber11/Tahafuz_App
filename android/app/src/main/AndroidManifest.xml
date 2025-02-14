@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -58,9 +59,19 @@
     </intent-filter> -->
       </activity>
       
+          <!-- <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" 
+          android:foregroundServiceType="mediaPlayback"
+          android:permission="android.permission.FOREGROUND_SERVICE"
+          android:exported="true"
+          /> -->
           <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" 
-          android:foregroundServiceType="shortService"
+          android:foregroundServiceType="dataSync|microphone|mediaPlayback|mediaProjection"
           android:exported="true"
           />
+          <!-- Actual Snippet -->
+          <!-- <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" 
+          android:foregroundServiceType="shortService"
+          android:exported="true"
+          /> -->
     </application>
 </manifest>

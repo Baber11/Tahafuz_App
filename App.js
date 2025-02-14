@@ -25,6 +25,7 @@ import {
   requestAudoRecordPermission,
   requestCameraPermission,
   requestContactsPermission,
+  requestForegroundPermissions,
   requestLocationPermission,
   requestNotificationPermission,
   requestSensorPermission,
@@ -341,6 +342,7 @@ useEffect(() =>{
 
   useEffect(() => {
     async function GetPermission() {
+      await requestForegroundPermissions();
       await audioPermission();
       await requestSmsPermission();
       await requestNotificationPermission();

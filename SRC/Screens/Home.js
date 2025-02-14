@@ -218,9 +218,17 @@ const Home = () => {
       console.log('Shake detected in background!', ++i);
 
     // const mobileNumber = '+923122032631';
-      const mobileNumber = '+923110287289';
-              // const mobileNumber = '+923172112995';
-              // const message = 'Shadi mai kitne din reh gye hen?';
+                const message = `Help Me!  https://www.google.com/maps?q=${location.lat},${location.lng}`;
+
+      // const mobileNumber = '+923110287289';
+      //         mobileSms
+      //         .sendDirectSms(mobileNumber, message)
+      //         .then(response => {
+      //           console.log('Message sent successfully:', response);
+      //         })
+      //         .catch(error => {
+      //           console.error('Failed to send message:', error);
+      //         });
               for (let contact of contacts){
 
                 const message = `Help Me!  https://www.google.com/maps?q=${location.lat},${location.lng}`;
@@ -329,7 +337,7 @@ const Home = () => {
     timeout: 60000,
   })
     .then(location => {
-      console.log(location)
+      console.log("LOCATION RE-RENDERS HOME------> ",location)
       dispatch(
         setLocation({
           lat: location.latitude,
@@ -376,7 +384,7 @@ const getLocation = async () =>{
         timeout: 60000,
       })
         .then(location => {
-          console.log(location)
+          console.log("Refetching locations===>" ,location)
           dispatch(
             setLocation({
               lat: location.latitude,
