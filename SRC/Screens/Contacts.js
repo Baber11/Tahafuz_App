@@ -52,21 +52,27 @@ const getContacts = async () =>{
 
 
 useEffect(()=>{
+  getContacts();
+},[isFocused,modalIsVisible])
+useEffect(()=>{
   const getContactsFromPhone = async () =>{
     const contatcsData= await Contacts.getAll();
+    console.log("🚀 ~ getContactsFromPhone ~ contatcsData:", JSON.stringify(contatcsData,null, 2))
+    
+  
+    // setFetchedContacts(finalContacts);
     setFetchedContacts(contatcsData?.map(item => ({
       id: item.recordID, 
       name: item.displayName,
       number: item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : '', 
       // photo: item.thumbnailPath ? item.thumbnailPath : null,
     })))
-    console.log(JSON.stringify(fetchedContacts,null,2));
+    // console.log("fetched contacts == > ",JSON.stringify(fetchedContacts,null,2));
   }
   console.log("RUNNING CONTACTS EFFECT FUNC()")
-  getContactsFromPhone();
-  getContacts();
-},[isFocused,modalIsVisible])
-
+  getContactsFromPhone(); 
+  console.log("fetched Contacts ")
+},[])
 
 
   return (

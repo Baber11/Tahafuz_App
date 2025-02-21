@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {Alert, AppState, DeviceEventEmitter, FlatList, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, StyleSheet, ToastAndroid, TouchableOpacity, View} from 'react-native';
+import {Alert, AppState, DeviceEventEmitter, FlatList, Linking, NativeEventEmitter, NativeModules, PermissionsAndroid, ScrollView, StyleSheet, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import GetLocation from 'react-native-get-location';
 import LinearGradient from 'react-native-linear-gradient';
 import {moderateScale} from 'react-native-size-matters';
@@ -9,7 +9,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-
+import ImageSlider from 'react-native-image-slider';
 // import Feather from "react-native-vector-icons/Feather";
 import CustomButton from '../Components/CustomButton';
 import CustomImage from '../Components/CustomImage';
@@ -32,6 +32,7 @@ const {ShakeModule} = NativeModules;
 const audioRecorderPlayer = new AudioRecorderPlayer();
 
 const Home = () => {
+  
   const location = useSelector(state => state.commonReducer.location);
   console.log("🚀 ~ Home ~ location:", location)
   const appIsInBackground = useSelector(state => state.commonReducer.appIsInbackground);
@@ -39,6 +40,52 @@ const Home = () => {
   const contacts = useSelector(state => state.commonReducer.contacts);
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
+  const carouselRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const DUMMY_PRODUCTS = [
+    {
+      id: 'p1',
+      image: require('../Assets/Images/illustration4.png'),
+      title: 'Majestic Vintage Mocha Overcoat',
+      price: 129.99,
+      description:
+        'Channel timeless sophistication with this stunning mocha overcoat. Crafted for the discerning gentleman who appreciates the fine blend of vintage charm and modern elegance.',
+    },
+    {
+      id: 'p2',
+      image: require('../Assets/Images/illustration4.png'),
+      title: 'Enchanting Blush Dream Gown',
+      price: 189.99,
+      description:
+        'Bask in the glow of elegance with our Enchanting Blush Dream Gown. Embody the regality of a queen with a sweet touch of pink that whispers enchantment. This is the perfect piece for those seeking to create unforgettable moments.',
+    },
+  
+    {
+      id: 'p3',
+      image: require('../Assets/Images/illustration4.png'),
+      title: 'Vintage Sunshine Rain Jacket',
+      price: 49.99,
+      description:
+        'Brace the showers in style! Our Vintage Sunshine Rain Jacket ensures that you stand out, even in the dullest weather. Because rain is never a reason to compromise on your fashion quotient.',
+    },
+    {
+      id: 'p4',
+      image: require('../Assets/Images/illustration4.png'),
+      title: 'Classic Merlot Business Suit',
+      price: 249.99,
+      description:
+        'Step into the boardroom with unmatched confidence in our Classic Merlot Business Suit. Exuding an air of refined class and understated power, it is ideal for the modern executive who values tradition and elegance.',
+    },
+   
+    {
+      id: 'p6',
+      image: require('../Assets/Images/illustration4.png'),
+      title: 'Pioneer Rugged Denim Jacket',
+      price: 79.99,
+      description:
+        'Our Pioneer Rugged Denim Jacket is a tribute to those who embody the spirit of adventure. Designed with durability and comfort in mind, this jacket is a wardrobe essential for the urban explorer.',
+    },
+  ];
   const emergencyCardData = [
     {
       id: 1,
@@ -332,25 +379,27 @@ const Home = () => {
     }
   },[backgroundEnabled])
 
-  GetLocation.getCurrentPosition({
-    enableHighAccuracy: true,
-    timeout: 60000,
-  })
-    .then(location => {
-      console.log("LOCATION RE-RENDERS HOME------> ",location)
-      dispatch(
-        setLocation({
-          lat: location.latitude,
-          lng: location.longitude,
-        }),
-      );
-      // console.log(location);
-    })
-    .catch(error => {
-      const {code, message} = error;
-      console.warn(code, message);
-    });
+  // GetLocation.getCurrentPosition({
+  //   enableHighAccuracy: true,
+  //   timeout: 60000,
+  // })
+  //   .then(location => {
+  //     console.log("LOCATION RE-RENDERS HOME------> ",location)
+  //     dispatch(
+  //       setLocation({
+  //         lat: location.latitude,
+  //         lng: location.longitude,
+  //       }),
+  //     );
+  //     // console.log(location);
+  //   })
+  //   .catch(error => {
+  //     const {code, message} = error;
+  //     console.warn(code, message);
+  //   });
 
+
+    
 const getLocation = async () =>{
   console.log("RUNNING GET LOCATION")
       // requestWritePermission();
@@ -444,25 +493,92 @@ const getLocation = async () =>{
         start={{x: 0.7, y: 0.7}}
         end={{x: 0.9, y: 0.8}}
         style={styles.main}>
+          <ScrollView showsVerticalScrollIndicator={false}
+    style={{width: windowWidth, 
+      
+      paddingHorizontal: moderateScale(12, 0.2),
+    }}
+          >
         <CustomText style={styles.title} isBold>
           Your Strong Personality.
         </CustomText>
-        <View style={styles.card}>
-          <View style={styles.textContainer}>
+        <View 
+        style={styles.card}
+        >
+          {/* <View style={styles.textContainer}>
             <CustomText style={styles.txt} isBold>
               Be
             </CustomText>
             <CustomText style={styles.txt2} isBold>
               Productive
             </CustomText>
-          </View>
-          <View style={styles.imgContainer}>
+          </View> */}
+          {/* <View style={styles.imgContainer}>
             <CustomImage
               resizeMode={'contain'}
               source={require('../Assets/Images/illustration4.png')}
               style={styles.image}
             />
-          </View>
+          </View> */}
+          <ImageSlider
+      
+      // loopBothSides
+      // autoPlayWithInterval={3000}
+      images={[
+       {image: require('../Assets/Images/illustration6.jpeg'),
+        link: "https://plan-international.org/case-studies/16-ways-to-end-violence-towards-girls/"
+      },
+       {image: require('../Assets/Images/illustration7.jpeg'),
+        link: "https://www.healthline.com/health/womens-health/self-defense-tips-escape"
+      },
+       { image: require('../Assets/Images/illustration8.jpeg'),
+      link: "https://www.healthline.com/health/womens-health/self-defense-tips-escape"
+      }
+    ]}
+      customSlide={({ index, item, style, width }) => (
+        // It's important to put style here because it's got offset inside
+        <View key={index} 
+        
+        style={[styles.customSlide]} 
+        onPress={() =>{
+          console.log("Index ====> ",item)
+        }}>
+          {/* <Text>{item?.name}</Text> */}
+          <View style={{ width: windowWidth * 0.9, 
+    height: windowHeight * 0.25,
+    borderRadius: 35,
+        overflow: "hidden",
+    // borderColor:"red",
+    // borderWidth:2,
+    // backgroundColor:"black", // Add background if needed
+    // elevation: 5, // Shadow for Android
+    // shadowColor: "#000", 
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.3,
+    // shadowRadius: 14,
+           
+          }}>
+  
+          <CustomImage onPress={() =>{
+            // setCurrImageIndex(index);
+            Linking.openURL(item.link)
+            // setIsVisible(true)
+            // navigationService.navigate('Image', {
+            //   imageData: {
+              //     uri: `${baseUrl}/${item?.name}`,
+              //     index: index
+              //   }
+              // })
+              console.log("Index ====> ",index)
+            }} source={item?.image} 
+            resizeMode={"stretch"}
+            style={styles.customImage} />
+              </View>
+
+        </View>
+      )}
+      
+    /> 
         </View>
         <View style={styles.emergencyTextView}>
           <CustomText style={styles.title} isBold>
@@ -561,7 +677,12 @@ const getLocation = async () =>{
             );
           })}
         </View>
+        <View
+        style={{height:windowHeight * 0.15}}
+        />
+      </ScrollView>
       </LinearGradient>
+
     </>
   );
 };
@@ -572,7 +693,6 @@ const styles = StyleSheet.create({
   main: {
     width: windowWidth,
     height: windowHeight * 0.93,
-    paddingHorizontal: moderateScale(22, 0.2),
     // alignItems:"center",
   },
   title: {
@@ -588,17 +708,17 @@ const styles = StyleSheet.create({
     color: '#3059DE',
   },
   card: {
-    width: windowWidth * 0.85,
+    width: windowWidth,
     backgroundColor: Color.white,
     flexDirection: 'row',
     alignSelf: 'center',
     gap: moderateScale(10, 0.2),
     justifyContent: 'center',
     // alignItems:"center",
-    marginTop: moderateScale(10, 0.2),
+    marginTop: moderateScale(4, 0.2),
     // paddingVertical:moderateScale(15,0.2),
     overflow: 'hidden',
-    borderRadius: moderateScale(20, 0.3),
+    // borderRadius: moderateScale(20, 0.3),
   },
   emergencyCard: {
     width: windowWidth * 0.65,
@@ -663,5 +783,24 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: moderateScale(12, 0.2),
   },
-  
+  customSlide: {
+    width:windowWidth ,
+    height:windowHeight * 0.36,
+    backgroundColor: '#FFECD0',
+    // paddingVertical:moderateScale(20,0.2),
+    // overflow:'hidden',
+    // overflow:"hidden",
+alignItems:"center",
+justifyContent:"center"
+
+  },
+  customImage: {
+    width: "100%",
+    height: '100%',
+    // borderColor:"green",
+    // borderWidth:5,
+    // overflow:"hidden",
+    // borderRadius:moderateScale(20,0.4)
+  },
+   
 });

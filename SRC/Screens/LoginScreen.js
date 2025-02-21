@@ -138,6 +138,8 @@ const LoginScreen = () => {
             textColor={Color.black}
             onPress={() => {
               login()
+      // dispatch(setUserToken({token: "token"}));
+
             
             }}
             width={windowWidth * 0.35}

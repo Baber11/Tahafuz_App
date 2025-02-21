@@ -5,6 +5,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Modal from 'react-native-modal';
 import { moderateScale } from 'react-native-size-matters';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Color from '../Assets/Utilities/Color';
 import { apiHeader, windowHeight, windowWidth } from '../Utillity/utils';
@@ -12,7 +13,8 @@ import CustomButton from './CustomButton';
 import CustomText from './CustomText';
 import TextInputWithTitle from './TextInputWithTitle';
 import { Post } from '../Axios/AxiosInterceptorFunction';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCOntacts } from '../Store/slices/common';
 
 const ContactsModal = ({
   modalIsVisible,
@@ -21,7 +23,9 @@ const ContactsModal = ({
   contacts,
   setContacts,
 }) => {
+  console.log("🚀 ~ data:", data)
   console.log("🚀 ~ contacts:", contacts)
+  const dispatch = useDispatch();
   const token = useSelector(state => state.authReducer.token);
   const [name, setName] = useState('');
   const [contactsData, setContactsData] = useState(data);
@@ -72,6 +76,19 @@ const ContactsModal = ({
         start={{x: 0.7, y: 0.7}}
         end={{x: 0.9, y: 0.8}}
         style={styles.maincontainer}>
+          <Icon
+          as={Entypo}
+          name='cross'
+          onPress={()=>{
+            setModalIsVisible(false)
+          }}
+          size={moderateScale(22,0.3)}
+          color={"#FF3974CC"}
+          style={{
+            position:"absolute",
+            top:moderateScale(7,0.2),
+            right: moderateScale(12,0.3)}}
+          />
         <TextInputWithTitle
           title={''}
           titleStlye={{fontSize: moderateScale(12, 0.2), paddingHorizontal: 0}}
@@ -92,7 +109,7 @@ const ContactsModal = ({
           // disable
         />
         <FlatList
-          data={data?.filter(item => item.name.includes(name))}
+          data={data?.filter(item => item.name.toLowerCase().includes(name?.toLowerCase()))}
           keyExtractor={item => item?.id}
           contentContainerStyle={[
             {
@@ -186,6 +203,8 @@ const ContactsModal = ({
               return Alert.alert(`Contacts duplicated`)
              }
              else{
+    // dispatch(setCOntacts(selectedContacts));  
+
               addContact()
              }
               // navigation.navigate("Settings")
