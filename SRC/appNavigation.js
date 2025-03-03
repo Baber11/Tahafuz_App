@@ -54,27 +54,7 @@ const dispatch = useDispatch();
     checkMicrophoneEnabled();
   },[])
 
-  useEffect(() => {
-    async function GetPermission() {
-      await audioPermission();         
-      await requestContactsPermission();
-      await requestForegroundPermissions();
-      await requestLocationPermission();     
-      await requestSmsPermission();
-      await requestNotificationPermission();
-      await requestCameraPermission();
-      await requestWritePermission();
-    }
-    // async function GetPermission2() {
-    //   await requestNotificationPermission();
-    //   await requestCameraPermission();
-    //   await requestContactsPermission();
-    //   await requestWritePermission();
-    
-    // }
-    GetPermission();
-    // GetPermission2();
-  }, []);
+
   const AppNavigatorContainer = () => {
     const firstScreen = token ? 'TabNavigation' : 'LoginScreen';
     return (
