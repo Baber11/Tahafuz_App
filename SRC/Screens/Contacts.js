@@ -1,7 +1,7 @@
 import { useIsFocused } from '@react-navigation/native'
 import { Avatar, Icon } from 'native-base'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, FlatList, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, PermissionsAndroid, StyleSheet, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import Contacts from 'react-native-contacts'
 import LinearGradient from 'react-native-linear-gradient'
 import { moderateScale } from 'react-native-size-matters'
@@ -11,11 +11,12 @@ import Color from '../Assets/Utilities/Color'
 import ContactsModal from '../Components/ContactsModal'
 import CustomText from '../Components/CustomText'
 import Header from '../Components/Header'
-import { requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils'
+import { apiHeader, requestContactsPermission, windowHeight, windowWidth } from '../Utillity/utils'
 import CustomImage from '../Components/CustomImage'
-import { Get } from '../Axios/AxiosInterceptorFunction'
+import { Delete, Get } from '../Axios/AxiosInterceptorFunction'
 import { useDispatch, useSelector } from 'react-redux'
 import { setCOntacts } from '../Store/slices/common'
+import ConfirmationModal from '../Components/ConfirmationModal'
 
 
 const ContactsScreen = () => {
@@ -26,7 +27,10 @@ const ContactsScreen = () => {
   // console.log("🚀 ~ ContactsScreen ~ contacts:", JSON.stringify(contacts,null,2))
   const [fetchedContacts , setFetchedContacts] = useState([]);
   const [modalIsVisible, setModalIsVisible] = useState(false)
+  const [confirmModalIsVisible, setConfirmModalIsVisible] = useState(false)
   const [isLoading, setIsLoading ] = useState(false);
+  const [isDeleting, setIsDeleting ] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState(0);
   useEffect(()=>{
     const checkpermissions = async ()=>{
     const granted=  await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)
@@ -49,28 +53,49 @@ const getContacts = async () =>{
     console.log("🚀 ~ getContacts ~ response?.data?.contacts_list:", response?.data?.contacts_list)
 }
 
-
+const deleteCOntact = async ()=>{
+  const url =`auth/contact/${selectedContactId}`;
+  setIsDeleting(true);
+  const response = await Delete(url, apiHeader(token));
+  setIsDeleting(false);
+  if(response != undefined){
+    setContactsData(prevData => prevData?.filter(item  => item?.id !== selectedContactId ) )
+    ToastAndroid.show("Contact has been deleted..", ToastAndroid.SHORT)
+    setConfirmModalIsVisible(false)
+  }
+}
 
 useEffect(()=>{
   getContacts();
 },[isFocused,modalIsVisible])
-useEffect(()=>{
-  const getContactsFromPhone = async () =>{
-    const contatcsData= await Contacts.getAll();
-    console.log("🚀 ~ getContactsFromPhone ~ contatcsData:", JSON.stringify(contatcsData,null, 2))
-    
+
+const getContactsFromPhone = async () =>{
+  const contatcsData= await Contacts.getAll();
+  console.log("🚀 ~ getContactsFromPhone ~ contatcsData:", JSON.stringify(contatcsData,null, 2))
   
-    // setFetchedContacts(finalContacts);
-    setFetchedContacts(contatcsData?.map(item => ({
-      id: item.recordID, 
-      name: item.displayName,
-      number: item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : '', 
-      // photo: item.thumbnailPath ? item.thumbnailPath : null,
-    })))
-    // console.log("fetched contacts == > ",JSON.stringify(fetchedContacts,null,2));
+
+  // setFetchedContacts(finalContacts);
+  setFetchedContacts(contatcsData?.map(item => ({
+    id: item.recordID, 
+    name: item.displayName,
+    number: item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : '', 
+    // photo: item.thumbnailPath ? item.thumbnailPath : null,
+  })))
+  // console.log("fetched contacts == > ",JSON.stringify(fetchedContacts,null,2));
+}
+
+
+ async function checkContactsPermssionsGranted(){
+  if (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)) {
+   await getContactsFromPhone(); 
+  }else{
+   await requestContactsPermission();
   }
+ }
+useEffect(()=>{
   console.log("RUNNING CONTACTS EFFECT FUNC()")
-  getContactsFromPhone(); 
+  checkContactsPermssionsGranted();
+  
   console.log("fetched Contacts ")
 },[])
 
@@ -86,7 +111,7 @@ useEffect(()=>{
         headerRight={true}
         />
         <LinearGradient 
-    colors={["#FFECD0","#FF3974CC"]}
+    colors={Color.themeBgColor}
     start={{x: 0.7, y:0.7 }}
     end={{x: 0.9, y:0.8 }}
     style={styles.main}
@@ -96,7 +121,7 @@ useEffect(()=>{
           alignItems:"center"
         }]}>
          { isLoading ? 
-          <ActivityIndicator color="#FF3974CC" size={"large"}/> 
+          <ActivityIndicator color={Color.secondaryColor} size={"large"}/> 
           : <FlatList 
           keyExtractor={item => item.id}
           data={contactsData}
@@ -120,7 +145,10 @@ useEffect(()=>{
           renderItem={({item,index}) =>{
            return(
                <TouchableOpacity
-               onPress={item?.onPress}
+               onPress={()=>{
+                setSelectedContactId(item?.id)
+                 setConfirmModalIsVisible(true) 
+               }}
                style={styles.ListTile}>
               
                    <Avatar 
@@ -137,6 +165,7 @@ useEffect(()=>{
                    <CustomText style={styles.phoneNum} isBold>{item.number}</CustomText>
                </View>
                {/* <View style={{width: windowWidth * 0.12}}> */}
+
 
            <Icon as={FontAwesome6} name={"phone"} 
                     color={Color.lightGreen}
@@ -170,6 +199,12 @@ useEffect(()=>{
     data={fetchedContacts?.filter(item => !contactsData.some( c => c.id === item?.id))}
     contacts={contactsData}
     setContacts={setContactsData}
+    />
+    <ConfirmationModal
+    isVisible={confirmModalIsVisible}
+    setIsVisible={setConfirmModalIsVisible}
+    isLoading={isDeleting}
+    onDelete={deleteCOntact}
     />
     </>
   )

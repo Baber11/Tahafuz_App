@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserToken } from '../Store/slices/auth';
 import { Post } from '../Axios/AxiosInterceptorFunction';
-import { setUserData } from '../Store/slices/common';
+import { setCOntacts, setUserData } from '../Store/slices/common';
 import { ScrollView } from 'native-base';
 
 const LoginScreen = () => {
@@ -43,6 +43,7 @@ const LoginScreen = () => {
 
       dispatch(setUserToken({token: response?.data?.token}));
       dispatch(setUserData(response?.data?.user_info));
+      dispatch(setCOntacts(response?.data?.user_info?.contacts))
       // dispatch(setUserWallet(response?.data?.user_info?.wallet));
     }
   };

@@ -49,6 +49,7 @@ const CustomButton = props => {
   } = props;
   return (
     <TouchableOpacity
+    
       activeOpacity={activeOpacity ? activeOpacity : 0.9}
       onPress={onPress}
       style={[

@@ -8,12 +8,12 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Icon } from 'native-base';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Image, View } from 'react-native';
+import { AppState, Image, PermissionsAndroid, View } from 'react-native';
 import { moderateScale } from 'react-native-size-matters';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Color from './Assets/Utilities/Color';
 import navigationService from './navigationService';
 import ContactsScreen from './Screens/Contacts';
@@ -24,8 +24,9 @@ import SafetyAtWork from './Screens/SafetyAtWork';
 import Settings from './Screens/Settings';
 import SignUp from './Screens/SignUp';
 import VoiceRecordings from './Screens/VoiceRecordings';
-import { windowHeight, windowWidth } from './Utillity/utils';
+import { audioPermission, requestCameraPermission, requestContactsPermission, requestForegroundPermissions, requestLocationPermission, requestNotificationPermission, requestSmsPermission, requestWritePermission, windowHeight, windowWidth } from './Utillity/utils';
 import ChangePassword from './Screens/ChangePassword';
+import { setAudioPermissionGranted } from './Store/slices/common';
 // import {createDrawerNavigator} from '@react-navigation/drawer';
 
 // enableScreens();
@@ -37,43 +38,43 @@ const AppNavigator = () => {
   const userData = useSelector(state => state.commonReducer.userData);
   const token = useSelector(state => state.authReducer.token);
   console.log("🚀 ~ AppNavigator ~ token:", token)
-
+const dispatch = useDispatch();
   const RootNav = createNativeStackNavigator();
   const RootNavLogged = createNativeStackNavigator();
   
-  const appState = useRef(AppState.currentState);
-  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  useEffect(() =>{
+    async function checkMicrophoneEnabled(){
+      if (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO)) {
+        dispatch(setAudioPermissionGranted(true))        
+      } else {
+        dispatch(setAudioPermissionGranted(false))
+       }
+    }
+
+    checkMicrophoneEnabled();
+  },[])
+
   useEffect(() => {
-    const handleAppStateChange =async  (nextAppState) => {
-      console.log("📢 AppState changed:", nextAppState, isBackgroundEnabled);
-  
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        console.log("✅ App is back in foreground ", BackgroundService.isRunning());
-        // BackgroundService.stop();
-        // shakeSubscription.remove();
-        // ShakeModule.stopListening();
-        console.log('Background task ended.');
-        
-      }
-  
-      if (nextAppState === 'background') {
-        // toggleBackground()
-        console.log("App is agin in background")
-      }
-  
-      appState.current = nextAppState;
-      setAppStateVisible(nextAppState);
-    };
-  
-  const subscription =  AppState.addEventListener("change", handleAppStateChange);
-  
-    return () => {
-      console.log("🛑 Cleaning up AppState listener...");
-      subscription.remove()
-    };
+    async function GetPermission() {
+      await audioPermission();         
+      await requestContactsPermission();
+      await requestForegroundPermissions();
+      await requestLocationPermission();     
+      await requestSmsPermission();
+      await requestNotificationPermission();
+      await requestCameraPermission();
+      await requestWritePermission();
+    }
+    // async function GetPermission2() {
+    //   await requestNotificationPermission();
+    //   await requestCameraPermission();
+    //   await requestContactsPermission();
+    //   await requestWritePermission();
+    
+    // }
+    GetPermission();
+    // GetPermission2();
   }, []);
-
-
   const AppNavigatorContainer = () => {
     const firstScreen = token ? 'TabNavigation' : 'LoginScreen';
     return (

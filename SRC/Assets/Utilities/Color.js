@@ -35,9 +35,10 @@ export default Color = {
   themeBlack: '#000000',
   btn_Color:'#282723',
   btntextColor:'#2F2F37',
-  
+  primaryColor:"#FFECD0",
+  secondaryColor:"#FF3974CC",
   //gradientColors
-  themeBgColor: ['#E9CB5800','#E9CB58'],
+  themeBgColor: ['#FFECD0', '#FF3974CC'],
   statusBarColor: ['#297FAD', '#297FAD'],
 };
 

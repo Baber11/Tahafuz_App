@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {Icon} from 'native-base';
 import {
   Alert,
   Dimensions,
+  Linking,
   Platform,
   Switch,
   ToastAndroid,
@@ -15,7 +16,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Color from '../Assets/Utilities/Color';
-import { windowHeight, windowWidth } from '../Utillity/utils';
+import { requestForegroundPermissions, windowHeight, windowWidth } from '../Utillity/utils';
 import CustomImage from './CustomImage';
 import CustomText from './CustomText';
 const {height, width} = Dimensions.get('window');
@@ -62,6 +63,7 @@ const Header = props => {
 
   const [searchText, setSearchText] = useState('');
   const user = useSelector(state => state.commonReducer.userData);
+  const audioPermissionGranted = useSelector(state => state.commonReducer.audioPermissionGranted)
   const userRole = useSelector(state => state.commonReducer.selectedRole);
   const token = useSelector(state => state.authReducer.token);
   const backgroundEnabled = useSelector(state => state.commonReducer.backgroundEnabled); 
@@ -88,7 +90,10 @@ const Header = props => {
     ]);
     return true;
   };
+// useEffect(()=>{
+// requestForegroundPermissions();
 
+// },[])
   return (
     <View
       style={[
@@ -219,8 +224,24 @@ const Header = props => {
           thumbColor={backgroundEnabled ? '#f5dd4b' : '#f4f3f4'}
           ios_backgroundColor="#3e3e3e"
           onValueChange={()=>{
-            if(contacts?.length == 0){
+            if(contacts?.length == 0 && !backgroundEnabled){
               return Alert.alert("No contacts found.", "Please add some contacts to app.")
+            }
+            if(!audioPermissionGranted){
+                return Alert.alert("Background Service Required Microphone permission.", "Please Allow this app to use Microphone."
+                , [
+                  {
+                    text:"Cancel",
+                    onPress: ()=>{}
+                  },
+                  {
+                    text:"Go to Settings",
+                    onPress: ()=>{
+                      Linking.openSettings();
+                    }
+                  },
+                ]
+                )
             }
             dispatch(setBackgroundEnabled())
           }}

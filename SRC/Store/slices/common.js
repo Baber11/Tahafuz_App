@@ -17,11 +17,15 @@ const initialState = {
   sellerService: [],
   selectedRole: '',
   category: [],
-  location: {},
+  location: {
+    lat: 24.9156682,
+    lng: 67.089528
+  },
   pickupLocatin: {},
   dropoffLocation: {},
   appIsInbackground: false,
   backgroundEnabled: false,
+  audioPermissionGranted:false,
   contacts:[]
 };
 
@@ -239,9 +243,12 @@ if(action.payload != undefined){     state.recordings.push({
         item => item.serviceOwner.id != action.payload.serviceOwner.id,
       );
     },
+    setAudioPermissionGranted(state, action){
+      state.audioPermissionGranted= action.payload;
+    },
     setLocation(state, action) {
+      console.log('🚀 ~ setLoaction ~ ==============location:', action.payload);
       state.location = action.payload;
-      // console.log('🚀 ~ setLoaction ~ ==============location:', action.payload);
     },
   },
 });
@@ -276,6 +283,7 @@ export const {
   setBackgroundEnabled,
   setAppIsInBackground,
   setCOntacts,
+  setAudioPermissionGranted,
   deleteAllRecordings
 } = CommonSlice.actions;
 
