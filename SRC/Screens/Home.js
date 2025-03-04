@@ -523,7 +523,7 @@ useFocusEffect(
         headerColor={'#FFECD0'}
         headerRight
         horizontalDots={true}
-        backgroundEventEnabled
+        backgroundEventEnabled={false}
         toggleBackgroundEvent={() => {
           // toggleBackground();
         }}

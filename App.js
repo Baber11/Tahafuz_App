@@ -70,10 +70,10 @@ const MainContainer = () => {
       await requestLocationPermission();
       await requestContactsPermission();
       await requestCameraPermission();
-      await requestNotificationPermission();
-      await requestSmsPermission();
-      await audioPermission();
-      await requestForegroundPermissions();
+      // await requestNotificationPermission();
+      // await requestSmsPermission();
+      // await audioPermission();
+      // await requestForegroundPermissions();
       await requestWritePermission();
     }
 
