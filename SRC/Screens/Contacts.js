@@ -15,7 +15,7 @@ import { apiHeader, requestContactsPermission, windowHeight, windowWidth } from 
 import CustomImage from '../Components/CustomImage'
 import { Delete, Get } from '../Axios/AxiosInterceptorFunction'
 import { useDispatch, useSelector } from 'react-redux'
-import { setCOntacts } from '../Store/slices/common'
+import { deleteContact, disabledBackgroundAction, setCOntacts } from '../Store/slices/common'
 import ConfirmationModal from '../Components/ConfirmationModal'
 
 
@@ -60,6 +60,7 @@ const deleteCOntact = async ()=>{
   setIsDeleting(false);
   if(response != undefined){
     setContactsData(prevData => prevData?.filter(item  => item?.id !== selectedContactId ) )
+    dispatch(deleteContact({id: selectedContactId}));
     ToastAndroid.show("Contact has been deleted..", ToastAndroid.SHORT)
     setConfirmModalIsVisible(false)
   }
@@ -68,6 +69,13 @@ const deleteCOntact = async ()=>{
 useEffect(()=>{
   getContacts();
 },[isFocused,modalIsVisible])
+
+useEffect(()=>{
+  console.log("🚀 ~ ContactsScreen ~ contactsData:", JSON.stringify(contactsData,null, 2))
+  if(contactsData?.length == 0){
+    dispatch(disabledBackgroundAction());
+  }
+}, [contactsData])
 
 const getContactsFromPhone = async () =>{
   const contatcsData= await Contacts.getAll();

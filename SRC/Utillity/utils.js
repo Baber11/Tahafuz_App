@@ -45,8 +45,10 @@ const requestLocationPermission = async () => {
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       console.log('You can use the Location');
+      return true;
     } else {
       console.log('Location permission denied');
+      return false
     }
   } catch (err) {
     console.warn(err);
@@ -141,6 +143,7 @@ const requestNotificationPermission = async () => {
 };
 
 const requestSmsPermission = async () => {
+  console.log("Insikde sms permissions.....")
   try {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.SEND_SMS,
@@ -319,54 +322,55 @@ const PERMISSIONS = {
     'android.permission.FOREGROUND_SERVICE_MICROPHONE',
 };
 
-const requestForegroundPermissions = async () => {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PERMISSIONS.FOREGROUND_SERVICE_MICROPHONE,
-      {
-        title: 'Background Microphone Permission',
-        message:
-          'This app requires access to microphone to record in background.',
-        buttonPositive: 'OK',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('Foreground Service permissions granted');
-      return true;
-    } else {
-      console.log('Foreground Service permissions denied');
-      return false;
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-};
-
 // const requestForegroundPermissions = async () => {
-//   if (Platform.OS === 'android' && Platform.Version >= 34) {
-//     console.log('INSIDE IF BLOCK', Platform.OS, Platform.Version);
-//     try {
-//       const granted = await PermissionsAndroid.request(
-//         PERMISSIONS.FOREGROUND_SERVICE_MICROPHONE,
-//         {
-//           title: 'Background Microphone Permission',
-//           message:
-//             'This app requires access to microphone to record in background.',
-//           buttonPositive: 'OK',
-//         },
-//       );
-
-//       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-//         console.log('Foreground Service permissions granted');
-//         return true;
-//       } else {
-//         console.log('Foreground Service permissions denied');
-//         return false;
-//       }
-//     } catch (err) {
-//       console.warn(err);
+//   try {
+//     const granted = await PermissionsAndroid.request(
+//       PERMISSIONS.FOREGROUND_SERVICE_MICROPHONE,
+//       {
+//         title: 'Background Microphone Permission',
+//         message:
+//           'This app requires access to microphone to record in background.',
+//         buttonPositive: 'OK',
+//       },
+//     );
+//     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+//       console.log('Foreground Service permissions granted');
+//       return true;
+//     } else {
+//       console.log('Foreground Service permissions denied');
+//       return false;
 //     }
+//   } catch (err) {
+//     console.warn(err);
 //   }
+// };
+
+const requestForegroundPermissions = async () => {
+  console.log("SSSSSS  ", Platform);
+  if (Platform.OS === 'android' && Platform.Version >= 34) {
+    console.log('INSIDE IF BLOCK', Platform.OS, Platform.Version);
+    try {
+      const granted = await PermissionsAndroid.request(
+        PERMISSIONS.FOREGROUND_SERVICE_MICROPHONE,
+        {
+          title: 'Background Microphone Permission',
+          message:
+            'This app requires access to microphone to record in background.',
+          buttonPositive: 'OK',
+        },
+      );
+
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Foreground Service permissions granted');
+        return true;
+      } else {
+        console.log('Foreground Service permissions denied');
+        return false;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }}
 
 //   // console.log("Entered in the foregroundSerivceRequest == >  ")
 //   // // if(Platform.OS == "android" && Platform.ver)

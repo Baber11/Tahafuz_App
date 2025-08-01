@@ -1,19 +1,19 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { PlatformPressable } from '@react-navigation/elements';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {PlatformPressable} from '@react-navigation/elements';
 import {
   NavigationContainer,
   useLinkBuilder,
   useTheme,
 } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Icon } from 'native-base';
-import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Image, PermissionsAndroid, View } from 'react-native';
-import { moderateScale } from 'react-native-size-matters';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {Icon} from 'native-base';
+import React, {useEffect, useRef, useState} from 'react';
+import {AppState, Image, PermissionsAndroid, View} from 'react-native';
+import {moderateScale} from 'react-native-size-matters';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Color from './Assets/Utilities/Color';
 import navigationService from './navigationService';
 import ContactsScreen from './Screens/Contacts';
@@ -24,9 +24,20 @@ import SafetyAtWork from './Screens/SafetyAtWork';
 import Settings from './Screens/Settings';
 import SignUp from './Screens/SignUp';
 import VoiceRecordings from './Screens/VoiceRecordings';
-import { audioPermission, requestCameraPermission, requestContactsPermission, requestForegroundPermissions, requestLocationPermission, requestNotificationPermission, requestSmsPermission, requestWritePermission, windowHeight, windowWidth } from './Utillity/utils';
+import {
+  audioPermission,
+  requestCameraPermission,
+  requestContactsPermission,
+  requestForegroundPermissions,
+  requestLocationPermission,
+  requestNotificationPermission,
+  requestSmsPermission,
+  requestWritePermission,
+  windowHeight,
+  windowWidth,
+} from './Utillity/utils';
 import ChangePassword from './Screens/ChangePassword';
-import { setAudioPermissionGranted } from './Store/slices/common';
+import {setAudioPermissionGranted} from './Store/slices/common';
 // import {createDrawerNavigator} from '@react-navigation/drawer';
 
 // enableScreens();
@@ -37,23 +48,26 @@ const AppNavigator = () => {
   const isVerified = useSelector(state => state.authReducer.isVerified);
   const userData = useSelector(state => state.commonReducer.userData);
   const token = useSelector(state => state.authReducer.token);
-  console.log("🚀 ~ AppNavigator ~ token:", token)
-const dispatch = useDispatch();
+  console.log('🚀 ~ AppNavigator ~ token:', token);
+  const dispatch = useDispatch();
   const RootNav = createNativeStackNavigator();
   const RootNavLogged = createNativeStackNavigator();
-  
-  useEffect(() =>{
-    async function checkMicrophoneEnabled(){
-      if (await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO)) {
-        dispatch(setAudioPermissionGranted(true))        
+
+  useEffect(() => {
+    async function checkMicrophoneEnabled() {
+      if (
+        await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        )
+      ) {
+        dispatch(setAudioPermissionGranted(true));
       } else {
-        dispatch(setAudioPermissionGranted(false))
-       }
+        dispatch(setAudioPermissionGranted(false));
+      }
     }
 
     checkMicrophoneEnabled();
-  },[])
-
+  }, []);
 
   const AppNavigatorContainer = () => {
     const firstScreen = token ? 'TabNavigation' : 'LoginScreen';
@@ -154,7 +168,7 @@ function MyTabBar({state, descriptors, navigation}) {
           iconName = isFocused ? 'alert-triangle' : 'alert-triangle';
           color = isFocused ? Color.black : Color.black;
           type = Feather;
-        } else{
+        } else {
           iconName = isFocused ? 'settings-outline' : 'settings-outline';
           type = Ionicons;
           color = isFocused ? Color.black : Color.black;
@@ -174,12 +188,13 @@ function MyTabBar({state, descriptors, navigation}) {
               //     paddingVertical:moderateScale(10,0.2),
               justifyContent: 'center',
               alignItems: 'center',
-              
             }}>
             <PlatformPressable
-          pressOpacity={0.2}
-          android_ripple={{color:"transparent",                
-          radius: (windowHeight * 0.08) / 2,}}
+              pressOpacity={0.2}
+              android_ripple={{
+                color: 'transparent',
+                radius: (windowHeight * 0.08) / 2,
+              }}
               onPress={onPress}
               onLongPress={onLongPress}
               style={{
@@ -196,14 +211,16 @@ function MyTabBar({state, descriptors, navigation}) {
                 bottom: moderateScale(15, 0.6),
               }}>
               {/* <Icon name={iconName} as={type} color={color} size={size} /> */}
-            <Image tintColor={Color.black}  source={require('./Assets/Images/women1.png')} />
+              <Image
+                tintColor={Color.black}
+                source={require('./Assets/Images/women1.png')}
+              />
             </PlatformPressable>
           </View>
         ) : route.name == 'VoiceRecordings' ? (
           <PlatformPressable
             pressOpacity={1}
-            android_ripple={{color:"transparent"}}
-            
+            android_ripple={{color: 'transparent'}}
             href={buildHref(route.name, route.params)}
             accessibilityState={isFocused ? {selected: true} : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -219,8 +236,8 @@ function MyTabBar({state, descriptors, navigation}) {
           </PlatformPressable>
         ) : (
           <PlatformPressable
-          pressOpacity={1}
-          android_ripple={{color:"#00000018"}}
+            pressOpacity={1}
+            android_ripple={{color: '#00000018'}}
             href={buildHref(route.name, route.params)}
             accessibilityState={isFocused ? {selected: true} : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -244,8 +261,6 @@ export const TabNavigation = () => {
       initialRouteName="Home"
       tabBar={props => <MyTabBar {...props} />}
       screenOptions={({route}) => ({
-        
-
         tabBarStyle: {
           paddingVertical: moderateScale(15, 0.2),
           // paddingHorizontal:moderateScale(10,0.2),

@@ -4,6 +4,7 @@ import {
   Alert,
   Dimensions,
   Linking,
+  PermissionsAndroid,
   Platform,
   Switch,
   ToastAndroid,
@@ -16,7 +17,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Color from '../Assets/Utilities/Color';
-import { requestForegroundPermissions, windowHeight, windowWidth } from '../Utillity/utils';
+import { requestForegroundPermissions, requestSmsPermission, windowHeight, windowWidth } from '../Utillity/utils';
 import CustomImage from './CustomImage';
 import CustomText from './CustomText';
 const {height, width} = Dimensions.get('window');
@@ -223,11 +224,11 @@ const Header = props => {
           trackColor={{false: '#767577', true: '#f5ce9f'}}
           thumbColor={backgroundEnabled ? '#f5dd4b' : '#f4f3f4'}
           ios_backgroundColor="#3e3e3e"
-          onValueChange={()=>{
+          onValueChange={ async()=>{
             if(contacts?.length == 0 && !backgroundEnabled){
               return Alert.alert("No contacts found.", "Please add some contacts to app.")
             }
-            if(!audioPermissionGranted){
+            if(await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO) == false){
                 return Alert.alert("Background Service Required Microphone permission.", "Please Allow this app to use Microphone."
                 , [
                   {
@@ -242,6 +243,10 @@ const Header = props => {
                   },
                 ]
                 )
+            } 
+            if(await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.SEND_SMS) == false){
+              console.log("sms permsiion",);
+              requestSmsPermission();
             }
             dispatch(setBackgroundEnabled())
           }}

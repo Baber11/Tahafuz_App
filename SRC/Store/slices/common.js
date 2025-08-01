@@ -92,8 +92,14 @@ if(action.payload != undefined){     state.recordings.push({
     setBackgroundEnabled(state, action) {
       state.backgroundEnabled = !state.backgroundEnabled;
     },
+    disabledBackgroundAction(state, action) {
+      state.backgroundEnabled= false;
+    },
     setCOntacts(state, action){
       state.contacts = action.payload
+    },
+    deleteContact(state, action){
+      state.contacts= state.contacts.filter(item => item.id != action.payload.id);
     },
     RemoveToCart(state, action) {
       const itemId = action.payload.id;
@@ -283,6 +289,8 @@ export const {
   setBackgroundEnabled,
   setAppIsInBackground,
   setCOntacts,
+  deleteContact,
+  disabledBackgroundAction,
   setAudioPermissionGranted,
   deleteAllRecordings
 } = CommonSlice.actions;

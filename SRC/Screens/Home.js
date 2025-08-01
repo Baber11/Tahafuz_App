@@ -39,6 +39,7 @@ const Home = () => {
   const appIsInBackground = useSelector(state => state.commonReducer.appIsInbackground);
   const backgroundEnabled = useSelector(state => state.commonReducer.backgroundEnabled);
   const contacts = useSelector(state => state.commonReducer.contacts);
+  console.log("🚀 ~ contacts:", contacts)
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const carouselRef = useRef(null);
@@ -358,7 +359,6 @@ const Home = () => {
   const toggleBackground = async () => {
     if (!BackgroundService.isRunning()) {
       try {
-        
         await BackgroundService.start(backgroundActions, options);
       } catch (error) {
         console.log(error);
@@ -523,9 +523,9 @@ useFocusEffect(
         headerColor={'#FFECD0'}
         headerRight
         horizontalDots={true}
-        backgroundEventEnabled={false}
+        backgroundEventEnabled={true}
         toggleBackgroundEvent={() => {
-          // toggleBackground();
+          toggleBackground();
         }}
       />
       <LinearGradient

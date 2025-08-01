@@ -265,8 +265,8 @@ const formattedDate = moment(date).format('DD/MM/YYYY');
         }}
     >Clear All</CustomText>}
           <FlatList
-            // data={recordings}
-            data={[]}
+            data={recordings}
+            // data={[]}
             keyExtractor={item => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
@@ -340,8 +340,8 @@ const formattedDate = moment(date).format('DD/MM/YYYY');
                   style={{width:"100%", height:"100%"}}
                   source={require("../Assets/Images/mic.png")}/>
                   </View>  
-                  {/* <CustomText isBold>No Audios recorded yet.</CustomText> */}
-                  <CustomText isBold>Coming soon</CustomText>
+                  <CustomText isBold>No Audios recorded yet.</CustomText>
+                  {/* <CustomText isBold>Coming soon</CustomText> */}
                 </View>
               )
              }}
@@ -360,7 +360,7 @@ style={styles.recordeingTimer}>
               height: windowWidth * 0.17,
               borderRadius: (windowWidth * 0.17) / 2,}]}
             onPress={() => {
-              // isRecording ? stopRecording() : startRecording();
+              isRecording ? stopRecording() : startRecording();
             }}>
             <Icon
               name={isRecording ? 'stop-circle-outline' : 'mic-sharp'}

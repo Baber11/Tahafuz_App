@@ -69,11 +69,11 @@ const MainContainer = () => {
       console.log('AUDIO PERMSIISON');
       await requestLocationPermission();
       await requestContactsPermission();
+      await requestForegroundPermissions();  
       await requestCameraPermission();
-      // await requestNotificationPermission();
-      // await requestSmsPermission();
-      // await audioPermission();
-      // await requestForegroundPermissions();
+      await requestNotificationPermission();
+      await requestSmsPermission();
+      await audioPermission();
       await requestWritePermission();
     }
 
